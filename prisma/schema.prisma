@@ -1,30 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+//
+// Enums
+//
+enum UserType {
+  service_provider
+  item_owner
+  both
 }
 
-// User model
+enum ListingType {
+  item
+  service
+}
+
+//
+// User Model
+//
 model User {
-  id        Int     @id @default(autoincrement())
-  email     String  @unique
-  password  String
-  name      String
-  user_type String  @default("both")
-  posts     Post[]  // relation to posts (listings)
+  user_id       Int       @id @default(autoincrement())
+  username      String
+  email         String    @unique
+  password_hash String
+  user_type     UserType  @default(both)    // enum for type safety
+  phone         String?                     // optional
+  location_text String?                     // optional
+  created_at    DateTime  @default(now())
+  listings      Listing[] @relation("UserListings")
 }
 
-// Post model (this is your Listing)
-model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  description String? // clearer than "content"
-  createdAt DateTime @default(now())
+//
+// Listing Model
+//
+model Listing {
+  item_id        Int         @id @default(autoincrement())
+  user_id        Int
+  type           ListingType                 // item or service
+  title          String
+  description    String
+  category       String
+  barter_request String?                     // what user wants in return
+  photos         String[]                    // array of image URLs
+  condition      String?                     // item condition (new/good/used)
+  availability   Json?                       // service availability (JSONB)
+  latitude       Float?
+  longitude      Float?
+  is_active      Boolean     @default(true)
+  created_at     DateTime    @default(now())
 
-  // relation fields
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [user_id], references: [user_id], name: "UserListings", onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([category])
+  @@index([created_at])
 }

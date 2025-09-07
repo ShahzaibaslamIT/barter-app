@@ -1,28 +1,29 @@
+export const runtime = 'nodejs';
+
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyPassword, generateToken } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma"; // ensure you have a singleton client here
+import type { UserType, ListingType } from "@prisma/client";
 
-const prisma = new PrismaClient();
 
-// User login
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
-    // Find user by email
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
       select: {
-        id: true,
+        user_id: true,
         email: true,
-        password: true,
+        username: true,
+        user_type: true as true, // ensure TS infers it
+        password_hash: true,
       },
     });
 
@@ -30,29 +31,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Verify password
-    const isValidPassword = await verifyPassword(password, user.password);
-    if (!isValidPassword) {
+    const ok = await verifyPassword(password, user.password_hash);
+    if (!ok) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    // Generate JWT token (only id and email)
+    // user.user_type is already the Prisma enum UserType
     const token = generateToken({
-      id: user.id.toString(),
+      id: String(user.user_id),
       email: user.email,
-      name: "",
-      user_type: "both"
+      name: user.username,
+      user_type: user.user_type as UserType,
     });
 
     return NextResponse.json({
       user: {
-        id: user.id.toString(),
+        id: String(user.user_id),
         email: user.email,
+        username: user.username,
+        user_type: user.user_type,
       },
       token,
     });
-  } catch (error) {
-    console.error("Login error:", error);
+  } catch (e) {
+    console.error("[login] error", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

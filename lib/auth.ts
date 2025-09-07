@@ -1,25 +1,31 @@
-import jwt from "jsonwebtoken"
-import bcrypt from "bcryptjs"
-import type { NextRequest } from "next/server"
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import type { NextRequest } from "next/server";
+import type { UserType } from "@prisma/client";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
+// Ensure JWT_SECRET is always a string
+const JWT_SECRET = process.env.JWT_SECRET as string;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not set in environment variables");
+}
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  user_type: "service_provider" | "item_owner" | "both"
+// The payload you put in JWTs
+export interface TokenUser {
+  id: string;
+  email: string;
+  name: string;
+  user_type: UserType; // enum from Prisma
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 12)
+  return bcrypt.hash(password, 12);
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
+  return bcrypt.compare(password, hashedPassword);
 }
 
-export function generateToken(user: User): string {
+export function generateToken(user: TokenUser): string {
   return jwt.sign(
     {
       id: user.id,
@@ -28,29 +34,27 @@ export function generateToken(user: User): string {
       user_type: user.user_type,
     },
     JWT_SECRET,
-    { expiresIn: "7d" },
-  )
+    { expiresIn: "7d" }
+  );
 }
 
-export function verifyToken(token: string): User | null {
+export function verifyToken(token: string): TokenUser | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as User
-    return decoded
+    return jwt.verify(token, JWT_SECRET) as TokenUser;
   } catch {
-    return null
+    return null;
   }
 }
 
 export function getTokenFromRequest(request: NextRequest): string | null {
-  const authHeader = request.headers.get("authorization")
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader.substring(7)
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice(7);
   }
-  return null
+  return null;
 }
 
-export function getUserFromRequest(request: NextRequest): User | null {
-  const token = getTokenFromRequest(request)
-  if (!token) return null
-  return verifyToken(token)
+export function getUserFromRequest(request: NextRequest): TokenUser | null {
+  const token = getTokenFromRequest(request);
+  return token ? verifyToken(token) : null;
 }

@@ -1,34 +1,22 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword, generateToken } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { UserType } from "@prisma/client"; // ✅ normal import
 
-const prisma = new PrismaClient();
-
-// Allowed user types
-const allowedUserTypes = ["both", "service_provider", "item_owner"] as const;
-type UserType = (typeof allowedUserTypes)[number];
-
-// ✅ Get all posts (listings)
-export async function GET() {
-  try {
-    const posts = await prisma.post.findMany({
-      include: {
-        user: true, // Include user info if needed
-      },
-    });
-    return NextResponse.json({ posts });
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
-  }
+// Coerce any incoming string to a valid enum value, defaulting to BOTH
+function toUserType(v: unknown): UserType {
+  const s = String(v ?? "").toLowerCase();
+  if (s === "service_provider") return UserType.service_provider;
+  if (s === "item_owner") return UserType.item_owner;
+  return UserType.both;
 }
 
-// ✅ User signup
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name, user_type } = await request.json();
+    const { email, password, name, phone, user_type, location_text } = await request.json();
 
-    // Validation
     if (!email || !password || !name) {
       return NextResponse.json(
         { error: "Email, password, and name are required" },
@@ -36,65 +24,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ensure user_type is valid
-    const finalUserType: UserType = allowedUserTypes.includes(user_type as UserType)
-      ? (user_type as UserType)
-      : "both";
+    const normalizedEmail = String(email).trim().toLowerCase();
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "User already exists with this email" },
-        { status: 409 }
-      );
+    // Uniqueness check
+    const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (existing) {
+      return NextResponse.json({ error: "User already exists with this email" }, { status: 409 });
     }
 
-    // Hash password
-    const passwordHash = await hashPassword(password);
+    const password_hash = await hashPassword(password);
 
-    // Create user
-    const user = await prisma.user.create({
+    const created = await prisma.user.create({
       data: {
-        email,
-        password: passwordHash,
-        name,
-        user_type: finalUserType,
+        email: normalizedEmail,
+        username: name,
+        password_hash,
+        user_type: toUserType(user_type), // ✅ enum-safe
+        phone: phone ?? null,
+        location_text: location_text ?? null,
       },
       select: {
-        id: true,
+        user_id: true,
         email: true,
-        name: true,
+        username: true,
         user_type: true,
       },
     });
 
-    // Generate token
     const token = generateToken({
-      id: user.id.toString(),
-      email: user.email,
-      name: user.name,
-      user_type: allowedUserTypes.includes(user.user_type as UserType)
-        ? (user.user_type as UserType)
-        : "both",
+      id: String(created.user_id),
+      email: created.email,
+      name: created.username,
+      user_type: created.user_type,
     });
 
-    return NextResponse.json({
-      user: {
-        id: user.id.toString(),
-        email: user.email,
-        name: user.name,
-        user_type: allowedUserTypes.includes(user.user_type as UserType)
-          ? (user.user_type as UserType)
-          : "both",
-      },
-      token,
-    });
-  } catch (error) {
-    console.error("Signup error:", error);
+    return NextResponse.json({ user: created, token }, { status: 201 });
+  } catch (e) {
+    console.error("[signup] error", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
