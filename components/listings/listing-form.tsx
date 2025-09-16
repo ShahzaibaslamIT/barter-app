@@ -129,14 +129,35 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
     setFormData((prev) => ({ ...prev, location_text: location.name }))
   }
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    const newPhotos = files.map((file, index) => `/placeholder.svg?height=200&width=200&query=${file.name}`)
-    setFormData((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...newPhotos].slice(0, 5),
-    }))
+const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = Array.from(e.target.files || [])
+  if (files.length === 0) return
+
+  try {
+    const formData = new FormData()
+    files.forEach((file) => formData.append("files", file))
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (res.ok && data.urls) {
+      setFormData((prev) => ({
+        ...prev,
+        photos: [...prev.photos, ...data.urls].slice(0, 5), // max 5 images
+      }))
+    } else {
+      alert("Failed to upload images: " + (data.error || "Unknown error"))
+    }
+  } catch (err) {
+    console.error("Upload failed", err)
+    alert("Upload failed")
   }
+}
+
+
 
   const removePhoto = (index: number) => {
     setFormData((prev) => ({

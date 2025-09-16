@@ -8,10 +8,18 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { RatingDialog } from "@/components/ratings/rating-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { Package, Wrench, Clock, CheckCircle, XCircle, MessageCircle, Star } from "lucide-react"
+import {
+  Package,
+  Wrench,
+  Clock,
+  CheckCircle,
+  XCircle,
+  MessageCircle,
+  Star,
+} from "lucide-react"
 
 interface Offer {
-  id: string
+  offer_id: number
   status: "pending" | "accepted" | "declined" | "completed" | "cancelled"
   message?: string
   created_at: string
@@ -45,14 +53,17 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
     if (offer.status === "completed") {
       checkRatingStatus()
     }
-  }, [offer.id, offer.status])
+  }, [offer.offer_id, offer.status])
 
   const checkRatingStatus = async () => {
     try {
       const token = localStorage.getItem("auth_token")
-      const response = await fetch(`/api/barter-offers/${offer.id}/rating-status`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const response = await fetch(
+        `/api/barter-offers/${offer.offer_id}/rating-status`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
 
       const data = await response.json()
       if (response.ok) {
@@ -64,12 +75,14 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
     }
   }
 
-  const handleStatusUpdate = async (newStatus: "accepted" | "declined" | "cancelled" | "completed") => {
+  const handleStatusUpdate = async (
+    newStatus: "accepted" | "declined" | "cancelled" | "completed"
+  ) => {
     setIsLoading(true)
     try {
       const token = localStorage.getItem("auth_token")
 
-      const response = await fetch(`/api/barter-offers/${offer.id}`, {
+      const response = await fetch(`/api/barter-offers/${offer.offer_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +106,8 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
         variant: "destructive",
       })
     } finally {
@@ -110,7 +124,9 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
       const data = await response.json()
       if (response.ok) {
-        const thread = data.threads.find((t: any) => t.barter_id === offer.id)
+        const thread = data.threads.find(
+          (t: any) => t.barter_id === offer.offer_id
+        )
         if (thread) {
           router.push(`/messages/${thread.thread_id}`)
         } else {
@@ -171,8 +187,10 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
     }
   }
 
-  const otherUser = type === "sent" ? offer.listing_owner_name : offer.offerer_name
-  const otherUserAvatar = type === "sent" ? offer.listing_owner_avatar : offer.offerer_avatar
+  const otherUser =
+    type === "sent" ? offer.listing_owner_name : offer.offerer_name
+  const otherUserAvatar =
+    type === "sent" ? offer.listing_owner_avatar : offer.offerer_avatar
 
   return (
     <>
@@ -183,7 +201,9 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
               {getStatusIcon()}
               <Badge className={getStatusColor()}>{offer.status}</Badge>
             </div>
-            <span className="text-xs text-muted-foreground">{formatDate(offer.created_at)}</span>
+            <span className="text-xs text-muted-foreground">
+              {formatDate(offer.created_at)}
+            </span>
           </div>
         </CardHeader>
 
@@ -201,7 +221,12 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={offer.listing_type === "item" ? "default" : "secondary"} className="text-xs">
+                  <Badge
+                    variant={
+                      offer.listing_type === "item" ? "default" : "secondary"
+                    }
+                    className="text-xs"
+                  >
                     {offer.listing_type === "item" ? (
                       <Package className="h-3 w-3 mr-1" />
                     ) : (
@@ -230,7 +255,11 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge
-                      variant={offer.offered_listing_type === "item" ? "default" : "secondary"}
+                      variant={
+                        offer.offered_listing_type === "item"
+                          ? "default"
+                          : "secondary"
+                      }
                       className="text-xs"
                     >
                       {offer.offered_listing_type === "item" ? (
@@ -241,7 +270,9 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
                       {offer.offered_listing_type}
                     </Badge>
                   </div>
-                  <h4 className="font-medium text-sm">{offer.offered_listing_title}</h4>
+                  <h4 className="font-medium text-sm">
+                    {offer.offered_listing_title}
+                  </h4>
                 </div>
               </div>
             </div>
@@ -250,8 +281,12 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
           {/* Message */}
           {offer.message && (
             <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Message:</p>
-              <p className="text-sm bg-muted/50 p-3 rounded-lg">{offer.message}</p>
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                Message:
+              </p>
+              <p className="text-sm bg-muted/50 p-3 rounded-lg">
+                {offer.message}
+              </p>
             </div>
           )}
 
@@ -259,11 +294,15 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
               <AvatarImage src={otherUserAvatar || "/placeholder.svg"} />
-              <AvatarFallback className="text-xs">{otherUser?.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-xs">
+                {otherUser?.charAt(0)}
+              </AvatarFallback>
             </Avatar>
             <div>
               <p className="text-sm font-medium">{otherUser}</p>
-              <p className="text-xs text-muted-foreground">{type === "sent" ? "Listing owner" : "Offer sender"}</p>
+              <p className="text-xs text-muted-foreground">
+                {type === "sent" ? "Listing owner" : "Offer sender"}
+              </p>
             </div>
           </div>
 
@@ -306,7 +345,11 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
           {offer.status === "accepted" && (
             <div className="flex gap-2">
-              <Button size="sm" className="flex-1" onClick={handleContinueInMessages}>
+              <Button
+                size="sm"
+                className="flex-1"
+                onClick={handleContinueInMessages}
+              >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Continue in Messages
               </Button>
@@ -322,9 +365,13 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
             </div>
           )}
 
-          {/* Rating functionality for completed barters */}
+          {/* Rating functionality */}
           {offer.status === "completed" && canRate && !hasRated && (
-            <Button size="sm" className="w-full" onClick={() => setShowRatingDialog(true)}>
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={() => setShowRatingDialog(true)}
+            >
               <Star className="h-4 w-4 mr-2" />
               Rate Experience
             </Button>
@@ -332,7 +379,9 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
           {offer.status === "completed" && hasRated && (
             <div className="text-center py-2">
-              <p className="text-sm text-muted-foreground">You have rated this barter</p>
+              <p className="text-sm text-muted-foreground">
+                You have rated this barter
+              </p>
             </div>
           )}
         </CardContent>
@@ -343,10 +392,13 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
         isOpen={showRatingDialog}
         onClose={() => setShowRatingDialog(false)}
         barter={{
-          id: offer.id,
+          id: offer.offer_id.toString(),
           listing_title: offer.listing_title,
           other_user_name: otherUser || "",
-          other_user_id: type === "sent" ? offer.listing_owner_name || "" : offer.offerer_name || "",
+          other_user_id:
+            type === "sent"
+              ? offer.listing_owner_name || ""
+              : offer.offerer_name || "",
         }}
         onSuccess={() => {
           setHasRated(true)

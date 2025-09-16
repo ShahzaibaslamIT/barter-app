@@ -11,7 +11,7 @@ if (!JWT_SECRET) {
 
 // The payload you put in JWTs
 export interface TokenUser {
-  id: string;
+  id: string | number;
   email: string;
   name: string;
   user_type: UserType; // enum from Prisma

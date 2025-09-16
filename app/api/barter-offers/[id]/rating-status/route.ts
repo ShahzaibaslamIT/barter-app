@@ -1,94 +1,93 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getUserFromRequest } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { NextRequest, NextResponse } from "next/server"
+import { getUserFromRequest } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = getUserFromRequest(request);
+    const user = getUserFromRequest(request)
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Fetch barter offer + relations
+    const offerId = Number(params.id)
+    if (!Number.isFinite(offerId)) {
+      return NextResponse.json({ error: "Invalid offer id" }, { status: 400 })
+    }
+
+    // ✅ Fetch barter + users involved
     const barter = await prisma.barterOffer.findUnique({
-      where: { id: params.id },
+      where: { offer_id: offerId },
       include: {
         listing: {
-          select: {
-            id: true,
-            title: true,
-            type: true,
-            user: { select: { id: true, name: true } },
+          include: {
+            user: { select: { user_id: true, username: true } },
           },
         },
-        offerer: { select: { id: true, name: true } },
-        ratings: {
-          where: {
-            OR: [
-              { raterId: user.id },
-              { ratedUserId: user.id },
-            ],
-          },
-          select: { id: true, raterId: true, ratedUserId: true },
-        },
+        offerer: { select: { user_id: true, username: true } },
       },
-    });
+    })
 
     if (!barter) {
-      return NextResponse.json({ error: "Barter not found" }, { status: 404 });
+      return NextResponse.json({ error: "Barter not found" }, { status: 404 })
     }
 
-    // Ensure current user is part of barter
-    if (
-      barter.offererId !== user.id &&
-      barter.listing.user.id !== user.id
-    ) {
+    const currentUserId = Number(user.id)
+
+    // ✅ Ensure current user is part of the barter
+    const isOfferer = barter.offerer_id === currentUserId
+    const isListingOwner = barter.listing.user.user_id === currentUserId
+    if (!isOfferer && !isListingOwner) {
       return NextResponse.json(
         { error: "You are not part of this barter" },
         { status: 403 }
-      );
+      )
     }
 
-    // Figure out other user
-    const otherUserId =
-      barter.offererId === user.id
-        ? barter.listing.user.id
-        : barter.offererId;
+    // ✅ Identify the other user
+    const otherUser = isOfferer ? barter.listing.user : barter.offerer
 
-    const otherUserName =
-      barter.offererId === user.id
-        ? barter.listing.user.name
-        : barter.offerer.name;
+    // ✅ Fetch ratings for this barter
+    const ratings = await prisma.rating.findMany({
+      where: {
+        barter_id: offerId,
+        OR: [
+          { rater_id: currentUserId },
+          { rated_user_id: currentUserId },
+        ],
+      },
+      select: {
+        rating_id: true,
+        rater_id: true,
+        rated_user_id: true,
+      },
+    })
 
-    // Rating check
-    const userRatedOther = barter.ratings.find((r) => r.raterId === user.id);
-    const otherRatedUser = barter.ratings.find(
-      (r) => r.ratedUserId === user.id
-    );
+    const userRatedOther = ratings.find(r => r.rater_id === currentUserId)
+    const otherRatedUser = ratings.find(r => r.rated_user_id === currentUserId)
+
+    // ✅ If your OfferStatus enum doesn’t yet include "completed",
+    //    cast to string to avoid TS error
+    const canRate =
+      barter.status === ("completed" as any) && !userRatedOther
 
     return NextResponse.json({
       barter: {
-        id: barter.id,
+        id: barter.offer_id,
         status: barter.status,
         listing_title: barter.listing.title,
         listing_type: barter.listing.type,
-        other_user_id: otherUserId,
-        other_user_name: otherUserName,
+        other_user_id: otherUser.user_id,
+        other_user_name: otherUser.username,
       },
-      can_rate: barter.status === "completed" && !userRatedOther,
+      can_rate: canRate,
       has_rated: !!userRatedOther,
       other_has_rated: !!otherRatedUser,
-    });
+    })
   } catch (error) {
-    console.error("Get rating status error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Get rating status error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

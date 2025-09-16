@@ -1,90 +1,90 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getUserFromRequest } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import { getUserFromRequest } from "@/lib/auth"
 
-const prisma = new PrismaClient();
-
+// Update an offer's status (accept / decline / cancel)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = getUserFromRequest(request);
+    const user = getUserFromRequest(request)
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { status } = await request.json();
-
-    if (!["accepted", "declined", "cancelled"].includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    // ✅ Await params
+    const { id } = await context.params
+    const offerId = Number(id)
+    if (!Number.isFinite(offerId)) {
+      return NextResponse.json({ error: "Invalid offer id" }, { status: 400 })
     }
 
-    // Find the offer + listing
+    const { status } = await request.json()
+
+    if (!["accepted", "declined", "cancelled", "completed"].includes(status)) {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 })
+    }
+
     const offer = await prisma.barterOffer.findUnique({
-      where: { id: params.id },
-      include: {
-        listing: { select: { userId: true } },
-      },
-    });
+      where: { offer_id: offerId },
+      include: { listing: { select: { user_id: true } } },
+    })
 
     if (!offer) {
-      return NextResponse.json({ error: "Offer not found" }, { status: 404 });
+      return NextResponse.json({ error: "Offer not found" }, { status: 404 })
     }
 
-    // Permission checks
-    if (status === "cancelled" && offer.offererId !== user.id) {
+    // ✅ Permission checks
+    if (status === "cancelled" && offer.offerer_id !== Number(user.id)) {
       return NextResponse.json(
-        { error: "Only the offerer can cancel an offer" },
+        { error: "Only the offerer can cancel this offer" },
         { status: 403 }
-      );
+      )
     }
 
     if (
       (status === "accepted" || status === "declined") &&
-      offer.listing.userId !== user.id
+      offer.listing.user_id !== Number(user.id)
     ) {
       return NextResponse.json(
-        { error: "Only the listing owner can accept or decline offers" },
+        { error: "Only the listing owner can accept/decline" },
         { status: 403 }
-      );
+      )
     }
 
     if (offer.status !== "pending") {
       return NextResponse.json(
-        { error: "Can only modify pending offers" },
+        { error: "Only pending offers can be modified" },
         { status: 400 }
-      );
+      )
     }
 
-    // Update offer
     const updatedOffer = await prisma.barterOffer.update({
-      where: { id: params.id },
+      where: { offer_id: offerId },
       data: {
         status,
-        updatedAt: new Date(),
       },
-    });
+    })
 
-    // If accepted, create a message thread (only once)
-    if (status === "accepted") {
-      await prisma.messageThread.upsert({
-        where: { barterId: params.id },
-        update: {}, // nothing to update if exists
-        create: {
-          barterId: params.id,
-          user1Id: offer.offererId,
-          user2Id: offer.listing.userId,
-        },
-      });
-    }
-
-    return NextResponse.json({ offer: updatedOffer });
+    return NextResponse.json({ offer: updatedOffer })
   } catch (error) {
-    console.error("Update barter offer error:", error);
+    console.error("Update barter offer error:", error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
-    );
+    )
   }
+}
+
+// ✅ CORS preflight
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "PUT,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  })
 }

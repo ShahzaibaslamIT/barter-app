@@ -7,6 +7,7 @@ import { BottomNav } from "@/components/ui/bottom-nav"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search, MapPin, TrendingUp, Loader2 } from "lucide-react"
+import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
 
 interface Listing {
   id: string
@@ -21,7 +22,7 @@ interface Listing {
   user_name: string
   user_avatar?: string
   user_rating: number
-  user_rating_count: number
+  rating_count: number
   created_at: string
 }
 
@@ -29,6 +30,7 @@ export default function HomePage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [offerTarget, setOfferTarget] = useState<Listing | null>(null) // 👈 NEW
   const router = useRouter()
 
   useEffect(() => {
@@ -38,19 +40,30 @@ export default function HomePage() {
   const fetchRecentListings = async () => {
     try {
       setIsLoading(true)
-      console.log("[v0] Fetching listings from API...")
       const response = await fetch("/api/listings?limit=8&sort=recent")
-
-      console.log("[v0] API response status:", response.status)
 
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] API response data:", data)
-        setListings(data.listings || [])
+        const mapped: Listing[] = (data.listings || []).map((l: any) => ({
+          id: String(l.item_id),
+          type: l.type,
+          title: l.title,
+          description: l.description,
+          category: l.category,
+          location_text: l.location_text || "",
+          barter_request: l.barter_request ?? "",
+          photos: Array.isArray(l.photos) ? l.photos : [],
+          condition: l.condition ?? "",
+          user_name: l.user?.username || "Anonymous",
+          user_avatar: l.user?.avatar_url || undefined,
+          user_rating: l.user?.rating ?? 0,
+          rating_count: l.user?.rating_count ?? 0,
+          created_at: l.created_at,
+        }))
+        setListings(mapped)
       } else {
         const errorText = await response.text()
         console.error("[v0] Failed to fetch listings:", response.status, errorText)
-        // Fallback to empty array if API fails
         setListings([])
       }
     } catch (error) {
@@ -61,10 +74,14 @@ export default function HomePage() {
     }
   }
 
+  const handleDeleted = (id: string) => {
+    setListings((prev) => prev.filter((l) => l.id !== id))
+  }
+
   const filteredListings = listings.filter(
     (listing) =>
       listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      listing.description.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -74,15 +91,23 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">BarterHub</h1>
-              <p className="text-sm text-muted-foreground">Discover local barter opportunities</p>
+              <h1 className="font-serif text-2xl font-bold text-primary">
+                BarterHub
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Discover local barter opportunities
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <Button onClick={() => router.push("/post")} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Post
               </Button>
-              <Button variant="outline" onClick={() => router.push("/auth")} size="sm">
+              <Button
+                variant="outline"
+                onClick={() => router.push("/auth")}
+                size="sm"
+              >
                 Login
               </Button>
             </div>
@@ -127,7 +152,11 @@ export default function HomePage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-serif text-xl font-semibold">Recent Listings</h2>
-            <Button variant="ghost" size="sm" onClick={() => router.push("/discover")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/discover")}
+            >
               View All
             </Button>
           </div>
@@ -151,17 +180,30 @@ export default function HomePage() {
                 <ListingCard
                   key={listing.id}
                   listing={listing}
-                  onViewDetails={(listing) => router.push(`/listings/${listing.id}`)}
-                  onMakeOffer={(listing) => {
-                    // TODO: Implement make offer functionality
-                    console.log("Make offer for:", listing.id)
-                  }}
+                  onViewDetails={() => router.push(`/listings/${listing.id}`)}
+                  onMakeOffer={() => setOfferTarget(listing)} // ✅ open dialog
+                  onDeleted={handleDeleted}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* ✅ Offer Dialog */}
+      {offerTarget && (
+        <MakeOfferDialog
+          isOpen={!!offerTarget}
+          onClose={() => setOfferTarget(null)}
+          targetListing={{
+            id: offerTarget.id,
+            title: offerTarget.title,
+            type: offerTarget.type,
+            user_name: offerTarget.user_name,
+          }}
+          onSuccess={() => router.push("/offers")}
+        />
+      )}
 
       <BottomNav />
     </div>

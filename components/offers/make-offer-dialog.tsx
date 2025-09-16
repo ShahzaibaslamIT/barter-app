@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -13,7 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Package, Wrench, MessageCircle } from "lucide-react"
 
 interface Listing {
-  id: string
+  item_id: number
   type: "item" | "service"
   title: string
   description: string
@@ -27,7 +26,7 @@ interface MakeOfferDialogProps {
   isOpen: boolean
   onClose: () => void
   targetListing: {
-    id: string
+    item_id: number
     title: string
     type: "item" | "service"
     user_name: string
@@ -37,7 +36,7 @@ interface MakeOfferDialogProps {
 
 export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: MakeOfferDialogProps) {
   const [myListings, setMyListings] = useState<Listing[]>([])
-  const [selectedListing, setSelectedListing] = useState<string>("")
+  const [selectedListing, setSelectedListing] = useState<number | null>(null)
   const [message, setMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingListings, setIsLoadingListings] = useState(false)
@@ -87,7 +86,7 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          listing_id: targetListing.id,
+          listing_id: targetListing.item_id,
           offered_listing_id: selectedListing || null,
           message,
         }),
@@ -117,7 +116,7 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
     }
   }
 
-  const selectedListingData = myListings.find((l) => l.id === selectedListing)
+  const selectedListingData = myListings.find((l) => l.item_id === selectedListing)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -149,10 +148,11 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
             ) : (
               <div className="grid gap-3 max-h-60 overflow-y-auto">
                 <div
+                  key="no-offer"
                   className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                    selectedListing === "" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    selectedListing === null ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
                   }`}
-                  onClick={() => setSelectedListing("")}
+                  onClick={() => setSelectedListing(null)}
                 >
                   <p className="font-medium">No specific offer</p>
                   <p className="text-sm text-muted-foreground">Just send a message to discuss</p>
@@ -160,13 +160,13 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
 
                 {myListings.map((listing) => (
                   <div
-                    key={listing.id}
+                    key={listing.item_id}
                     className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedListing === listing.id
+                      selectedListing === listing.item_id
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     }`}
-                    onClick={() => setSelectedListing(listing.id)}
+                    onClick={() => setSelectedListing(listing.item_id)}
                   >
                     <div className="flex gap-3">
                       <img

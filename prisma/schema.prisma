@@ -21,6 +21,14 @@ enum ListingType {
   service
 }
 
+enum OfferStatus {
+  pending
+  accepted
+  declined
+  withdrawn
+  completed   // ✅ Added this for rating support
+}
+
 //
 // User Model
 //
@@ -29,11 +37,22 @@ model User {
   username      String
   email         String    @unique
   password_hash String
-  user_type     UserType  @default(both)    // enum for type safety
-  phone         String?                     // optional
-  location_text String?                     // optional
+  user_type     UserType  @default(both)
+  phone         String?
+  location_text String?
+
+  avatar_url    String?
+  rating        Float?
+  rating_count  Int?
+
   created_at    DateTime  @default(now())
-  listings      Listing[] @relation("UserListings")
+
+  listings      Listing[]     @relation("UserListings")
+  offersMade    BarterOffer[] @relation("OffersMade")
+
+  // ✅ Ratings
+  ratingsGiven  Rating[] @relation("RaterRelation")
+  ratingsReceived Rating[] @relation("RatedRelation")
 }
 
 //
@@ -42,22 +61,71 @@ model User {
 model Listing {
   item_id        Int         @id @default(autoincrement())
   user_id        Int
-  type           ListingType                 // item or service
+  type           ListingType
   title          String
   description    String
   category       String
-  barter_request String?                     // what user wants in return
-  photos         String[]                    // array of image URLs
-  condition      String?                     // item condition (new/good/used)
-  availability   Json?                       // service availability (JSONB)
+  barter_request String?
+  photos         String[]
+  condition      String?
+  availability   Json?
   latitude       Float?
   longitude      Float?
+  location_text  String?
   is_active      Boolean     @default(true)
   created_at     DateTime    @default(now())
 
   user User @relation(fields: [user_id], references: [user_id], name: "UserListings", onDelete: Cascade)
 
+  offers         BarterOffer[] @relation("ListingOffers")
+  offeredAs      BarterOffer[] @relation("OfferedListingRelation")
+
   @@index([user_id])
   @@index([category])
   @@index([created_at])
+}
+
+//
+// BarterOffer Model
+//
+model BarterOffer {
+  offer_id           Int        @id @default(autoincrement())
+  listing_id         Int
+  offerer_id         Int
+  offered_listing_id Int?
+  message            String?
+  status             OfferStatus @default(pending)
+  created_at         DateTime   @default(now())
+
+  listing        Listing  @relation("ListingOffers", fields: [listing_id], references: [item_id])
+  offeredListing Listing? @relation("OfferedListingRelation", fields: [offered_listing_id], references: [item_id])
+  offerer        User     @relation("OffersMade", fields: [offerer_id], references: [user_id])
+
+  // ✅ Ratings
+  ratings        Rating[]
+
+  @@index([listing_id])
+  @@index([offerer_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+//
+// Rating Model ✅ NEW
+//
+model Rating {
+  rating_id     Int    @id @default(autoincrement())
+  barter_id     Int
+  rater_id      Int
+  rated_user_id Int
+  score         Int    // 1–5 stars
+  comment       String?
+
+  barter BarterOffer @relation(fields: [barter_id], references: [offer_id])
+  rater  User        @relation("RaterRelation", fields: [rater_id], references: [user_id])
+  rated  User        @relation("RatedRelation", fields: [rated_user_id], references: [user_id])
+
+  created_at DateTime @default(now())
+
+  @@unique([barter_id, rater_id]) // one rating per user per barter
 }

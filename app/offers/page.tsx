@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowUpRight, ArrowDownLeft, Handshake } from "lucide-react"
 
 interface Offer {
-  id: string
+  offer_id: number
   status: "pending" | "accepted" | "declined" | "completed" | "cancelled"
   message?: string
   created_at: string
@@ -121,7 +121,12 @@ export default function OffersPage() {
               </div>
             ) : (
               receivedOffers.map((offer) => (
-                <OfferCard key={offer.id} offer={offer} type="received" onUpdate={fetchOffers} />
+                <OfferCard
+                  key={offer.offer_id}
+                  offer={{ ...offer, id: String(offer.offer_id) }}
+                  type="received"
+                  onUpdate={fetchOffers}
+                />
               ))
             )}
           </TabsContent>
@@ -140,7 +145,14 @@ export default function OffersPage() {
                 </p>
               </div>
             ) : (
-              sentOffers.map((offer) => <OfferCard key={offer.id} offer={offer} type="sent" onUpdate={fetchOffers} />)
+              sentOffers.map((offer) => (
+                <OfferCard
+                  key={offer.offer_id}
+                  offer={{ ...offer, id: String(offer.offer_id) }}
+                  type="sent"
+                  onUpdate={fetchOffers}
+                />
+              ))
             )}
           </TabsContent>
         </Tabs>

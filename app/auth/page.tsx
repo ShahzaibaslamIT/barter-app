@@ -10,11 +10,14 @@ export default function AuthPage() {
   const router = useRouter()
 
   const handleAuthSuccess = (user: any, token: string) => {
-    // Store token in localStorage
+    // ✅ Store token & user securely
     localStorage.setItem("auth_token", token)
     localStorage.setItem("user", JSON.stringify(user))
 
-    // Redirect to home page
+    // Optional: set a flag so API calls can read it
+    console.log("✅ Logged in as", user.username, "with token:", token)
+
+    // ✅ Redirect to home page
     router.push("/")
   }
 
@@ -23,14 +26,23 @@ export default function AuthPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="font-serif text-3xl font-bold text-primary mb-2">BarterHub</h1>
-          <p className="text-muted-foreground">Trade items and services with your local community</p>
+          <p className="text-muted-foreground">
+            Trade items and services with your local community
+          </p>
         </div>
 
+        {/* Auth form triggers login/signup */}
         <AuthForm mode={mode} onSuccess={handleAuthSuccess} />
 
         <div className="text-center">
-          <Button variant="ghost" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-sm">
-            {mode === "login" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+          <Button
+            variant="ghost"
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+            className="text-sm"
+          >
+            {mode === "login"
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Sign in"}
           </Button>
         </div>
       </div>

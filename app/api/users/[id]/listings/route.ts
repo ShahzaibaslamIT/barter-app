@@ -1,28 +1,46 @@
 import { type NextRequest, NextResponse } from "next/server"
-import pool from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { getUserFromRequest } from "@/lib/auth"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }   // 👈 params is a Promise
+) {
   try {
     const user = getUserFromRequest(request)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Only allow users to fetch their own listings for making offers
-    if (params.id !== user.id) {
+    // ✅ Await params
+    const { id } = await context.params
+
+    // ✅ Ensure user only sees their own listings
+    if (Number(id) !== Number(user.id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    const result = await pool.query(
-      `SELECT id, type, title, description, category, photos, condition, created_at
-       FROM listings 
-       WHERE user_id = $1 AND is_active = true
-       ORDER BY created_at DESC`,
-      [user.id],
-    )
+    const listings = await prisma.listing.findMany({
+      where: {
+        user_id: Number(user.id),
+        is_active: true,
+      },
+      select: {
+        item_id: true,
+        type: true,
+        title: true,
+        description: true,
+        category: true,
+        photos: true,
+        condition: true,
+        created_at: true,
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    })
 
-    return NextResponse.json({ listings: result.rows })
+    return NextResponse.json({ listings })
   } catch (error) {
     console.error("Get user listings error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
