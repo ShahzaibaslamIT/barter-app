@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,19 +11,19 @@ import { useToast } from "@/hooks/use-toast"
 import { Send, Package, Wrench } from "lucide-react"
 
 interface Message {
-  id: string
-  content: string
+  message_id: number
+  thread_id: number
   sender_id: string
   sender_name: string
   sender_avatar?: string
+  content: string
   created_at: string
-  is_read: boolean
 }
 
 interface Thread {
-  id: string
-  barter_id: string
-  listing_id: string
+  thread_id: number
+  barter_id: number | null
+  listing_id: number | null
   listing_title: string
   listing_type: "item" | "service"
   listing_photos: string[]
@@ -38,7 +37,7 @@ interface Thread {
 }
 
 interface ChatInterfaceProps {
-  threadId: string
+  threadId: number
   currentUserId: string
 }
 
@@ -117,7 +116,8 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send message",
+        description:
+          error instanceof Error ? error.message : "Failed to send message",
         variant: "destructive",
       })
     } finally {
@@ -132,7 +132,9 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    )
 
     if (diffInHours < 24) {
       return date.toLocaleTimeString("en-US", {
@@ -173,8 +175,16 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
 
   const otherUser =
     thread.user_1_id === currentUserId
-      ? { id: thread.user_2_id, name: thread.user_2_name, avatar: thread.user_2_avatar }
-      : { id: thread.user_1_id, name: thread.user_1_name, avatar: thread.user_1_avatar }
+      ? {
+          id: thread.user_2_id,
+          name: thread.user_2_name || "Anonymous",
+          avatar: thread.user_2_avatar,
+        }
+      : {
+          id: thread.user_1_id,
+          name: thread.user_1_name || "Anonymous",
+          avatar: thread.user_1_avatar,
+        }
 
   return (
     <div className="flex flex-col h-full">
@@ -183,12 +193,16 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
         <div className="flex items-center gap-3 mb-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src={otherUser.avatar || "/placeholder.svg"} />
-            <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+            <AvatarFallback>
+              {otherUser.name ? otherUser.name.charAt(0) : "?"}
+            </AvatarFallback>
           </Avatar>
           <div>
             <h3 className="font-semibold">{otherUser.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {thread.barter_status === "accepted" ? "Barter accepted" : "Discussing barter"}
+              {thread.barter_status === "accepted"
+                ? "Barter accepted"
+                : "Discussing barter"}
             </p>
           </div>
         </div>
@@ -204,7 +218,12 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={thread.listing_type === "item" ? "default" : "secondary"} className="text-xs">
+                  <Badge
+                    variant={
+                      thread.listing_type === "item" ? "default" : "secondary"
+                    }
+                    className="text-xs"
+                  >
                     {thread.listing_type === "item" ? (
                       <Package className="h-3 w-3 mr-1" />
                     ) : (
@@ -225,26 +244,47 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
         {messages.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">No messages yet</p>
-            <p className="text-sm text-muted-foreground">Start the conversation!</p>
+            <p className="text-sm text-muted-foreground">
+              Start the conversation!
+            </p>
           </div>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwnMessage = message.sender_id === currentUserId
             return (
-              <div key={message.id} className={`flex gap-3 ${isOwnMessage ? "flex-row-reverse" : ""}`}>
+              <div
+                key={message.message_id ?? `${message.sender_id}-${index}`} // ✅ safe unique key
+                className={`flex gap-3 ${
+                  isOwnMessage ? "flex-row-reverse" : ""
+                }`}
+              >
                 <Avatar className="h-8 w-8 flex-shrink-0">
-                  <AvatarImage src={message.sender_avatar || "/placeholder.svg"} />
-                  <AvatarFallback className="text-xs">{message.sender_name.charAt(0)}</AvatarFallback>
+                  <AvatarImage
+                    src={message.sender_avatar || "/placeholder.svg"}
+                  />
+                  <AvatarFallback className="text-xs">
+                    {message.sender_name
+                      ? message.sender_name.charAt(0)
+                      : "?"}
+                  </AvatarFallback>
                 </Avatar>
-                <div className={`flex-1 max-w-xs ${isOwnMessage ? "text-right" : ""}`}>
+                <div
+                  className={`flex-1 max-w-xs ${
+                    isOwnMessage ? "text-right" : ""
+                  }`}
+                >
                   <div
                     className={`inline-block p-3 rounded-lg ${
-                      isOwnMessage ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      isOwnMessage
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">{formatTime(message.created_at)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatTime(message.created_at)}
+                  </p>
                 </div>
               </div>
             )
@@ -263,7 +303,11 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
             className="flex-1"
             disabled={isSending}
           />
-          <Button type="submit" size="sm" disabled={!newMessage.trim() || isSending}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!newMessage.trim() || isSending}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </form>

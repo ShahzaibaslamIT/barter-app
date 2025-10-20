@@ -10,6 +10,9 @@ import { ArrowUpRight, ArrowDownLeft, Handshake } from "lucide-react"
 
 interface Offer {
   offer_id: number
+  listing_id: number
+  offerer_id: number
+  listing_owner_id: number
   status: "pending" | "accepted" | "declined" | "completed" | "cancelled"
   message?: string
   created_at: string
@@ -54,7 +57,10 @@ export default function OffersPage() {
         }),
       ])
 
-      const [sentData, receivedData] = await Promise.all([sentResponse.json(), receivedResponse.json()])
+      const [sentData, receivedData] = await Promise.all([
+        sentResponse.json(),
+        receivedResponse.json(),
+      ])
 
       if (sentResponse.ok) setSentOffers(sentData.offers)
       if (receivedResponse.ok) setReceivedOffers(receivedData.offers)
@@ -65,8 +71,12 @@ export default function OffersPage() {
     }
   }
 
-  const pendingSentCount = sentOffers.filter((offer) => offer.status === "pending").length
-  const pendingReceivedCount = receivedOffers.filter((offer) => offer.status === "pending").length
+  const pendingSentCount = sentOffers.filter(
+    (offer) => offer.status === "pending"
+  ).length
+  const pendingReceivedCount = receivedOffers.filter(
+    (offer) => offer.status === "pending"
+  ).length
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -76,8 +86,12 @@ export default function OffersPage() {
           <div className="flex items-center gap-2">
             <Handshake className="h-6 w-6 text-primary" />
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary">My Offers</h1>
-              <p className="text-sm text-muted-foreground">Manage your barter offers</p>
+              <h1 className="font-serif text-2xl font-bold text-primary">
+                My Offers
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Manage your barter offers
+              </p>
             </div>
           </div>
         </div>
@@ -90,7 +104,10 @@ export default function OffersPage() {
               <ArrowDownLeft className="h-4 w-4" />
               Received
               {pendingReceivedCount > 0 && (
-                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 text-xs">
+                <Badge
+                  variant="destructive"
+                  className="ml-1 h-5 w-5 p-0 text-xs"
+                >
                   {pendingReceivedCount}
                 </Badge>
               )}
@@ -99,7 +116,10 @@ export default function OffersPage() {
               <ArrowUpRight className="h-4 w-4" />
               Sent
               {pendingSentCount > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="ml-1 h-5 w-5 p-0 text-xs"
+                >
                   {pendingSentCount}
                 </Badge>
               )}
@@ -116,14 +136,15 @@ export default function OffersPage() {
                 <ArrowDownLeft className="h-12 w-12 mx-auto text-muted-foreground" />
                 <p className="text-muted-foreground">No offers received yet</p>
                 <p className="text-sm text-muted-foreground">
-                  When someone makes an offer on your listings, they'll appear here
+                  When someone makes an offer on your listings, they'll appear
+                  here
                 </p>
               </div>
             ) : (
               receivedOffers.map((offer) => (
                 <OfferCard
                   key={offer.offer_id}
-                  offer={{ ...offer, id: String(offer.offer_id) }}
+                  offer={offer}
                   type="received"
                   onUpdate={fetchOffers}
                 />
@@ -148,7 +169,7 @@ export default function OffersPage() {
               sentOffers.map((offer) => (
                 <OfferCard
                   key={offer.offer_id}
-                  offer={{ ...offer, id: String(offer.offer_id) }}
+                  offer={offer}
                   type="sent"
                   onUpdate={fetchOffers}
                 />

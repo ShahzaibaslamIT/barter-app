@@ -4,10 +4,10 @@ import { getUserFromRequest } from "@/lib/auth"
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }   // 👈 params is a Promise
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = getUserFromRequest(request)
+    const user = await getUserFromRequest(request)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -16,13 +16,13 @@ export async function GET(
     const { id } = await context.params
 
     // ✅ Ensure user only sees their own listings
-    if (Number(id) !== Number(user.id)) {
+    if (Number(id) !== Number(user.user_id)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     const listings = await prisma.listing.findMany({
       where: {
-        user_id: Number(user.id),
+        user_id: Number(user.user_id), // ✅ fixed
         is_active: true,
       },
       select: {

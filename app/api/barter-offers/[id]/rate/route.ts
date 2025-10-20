@@ -7,12 +7,12 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = getUserFromRequest(request)
+    const user = await getUserFromRequest(request)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = Number(user.id)
+    const userId = Number(user.user_id)
     const offerId = Number(params.id)
     if (!Number.isFinite(offerId)) {
       return NextResponse.json({ error: "Invalid offer id" }, { status: 400 })

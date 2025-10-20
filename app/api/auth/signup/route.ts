@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     });
 
     const token = generateToken({
-      id: String(created.user_id),
+      user_id: String(created.user_id),
       email: created.email,
       name: created.username,
       user_type: created.user_type,

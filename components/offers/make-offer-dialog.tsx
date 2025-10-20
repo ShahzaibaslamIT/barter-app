@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -29,6 +30,7 @@ interface MakeOfferDialogProps {
     item_id: number
     title: string
     type: "item" | "service"
+    user_id: number            // ✅ listing owner id
     user_name: string
   }
   onSuccess?: () => void
@@ -41,6 +43,7 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingListings, setIsLoadingListings] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     if (isOpen) {
@@ -79,6 +82,7 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
     try {
       const token = localStorage.getItem("auth_token")
 
+      // Step 1: Create the barter offer
       const response = await fetch("/api/barter-offers", {
         method: "POST",
         headers: {
@@ -88,14 +92,26 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
         body: JSON.stringify({
           listing_id: targetListing.item_id,
           offered_listing_id: selectedListing || null,
-          message,
+          message, // ✅ still pass for backend
         }),
       })
 
       const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Failed to create offer")
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create offer")
+      // Step 2: Ensure initial message is inserted into the thread
+      if (message && data.thread?.thread_id) {
+        await fetch("/api/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            thread_id: data.thread.thread_id,
+            content: message.trim(),
+          }),
+        })
       }
 
       toast({
@@ -105,6 +121,11 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
 
       onClose()
       onSuccess?.()
+
+      // Step 3: Redirect user into the messages thread
+      if (data.thread?.thread_id) {
+        router.push(`/messages/${data.thread.thread_id}`)
+      }
     } catch (error) {
       toast({
         title: "Error",

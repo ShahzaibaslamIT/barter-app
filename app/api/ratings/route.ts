@@ -1,119 +1,185 @@
-import { type NextRequest, NextResponse } from "next/server"
-import pool from "@/lib/db"
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 import { getUserFromRequest } from "@/lib/auth"
 
+// ---------------- GET ratings for a user ----------------
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("user_id")
 
     if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      )
     }
 
-    // Get ratings for a specific user
-    const result = await pool.query(
-      `SELECT r.*, u.name as rater_name, u.avatar_url as rater_avatar,
-              bo.listing_id, l.title as listing_title, l.type as listing_type
-       FROM ratings r
-       JOIN users u ON r.rater_id = u.id
-       JOIN barter_offers bo ON r.barter_id = bo.id
-       JOIN listings l ON bo.listing_id = l.id
-       WHERE r.rated_user_id = $1
-       ORDER BY r.created_at DESC`,
-      [userId],
-    )
+    // ✅ Get ratings with related info
+    const ratings = await prisma.rating.findMany({
+      where: { rated_user_id: Number(userId) },
+      include: {
+        rater: { select: { user_id: true, username: true, avatar_url: true } },
+        barter: {
+          include: {
+            listing: { select: { item_id: true, title: true, type: true } },
+          },
+        },
+      },
+      orderBy: { created_at: "desc" },
+    })
 
-    // Calculate average rating
-    const avgResult = await pool.query(
-      "SELECT AVG(rating)::numeric(3,2) as avg_rating, COUNT(*) as total_ratings FROM ratings WHERE rated_user_id = $1",
-      [userId],
-    )
+    // ✅ Calculate average rating
+    const avgResult = await prisma.rating.aggregate({
+      where: { rated_user_id: Number(userId) },
+      _avg: { score: true },
+      _count: { score: true },
+    })
 
     return NextResponse.json({
-      ratings: result.rows,
-      average_rating: Number.parseFloat(avgResult.rows[0].avg_rating) || 0,
-      total_ratings: Number.parseInt(avgResult.rows[0].total_ratings) || 0,
+      ratings: ratings.map((r) => ({
+        rating_id: r.rating_id,
+        barter_id: r.barter_id,
+        rater_id: r.rater_id,
+        rater_name: r.rater.username,
+        rater_avatar: r.rater.avatar_url,
+        rated_user_id: r.rated_user_id,
+        score: r.score,
+        comment: r.comment,
+        listing_id: r.barter.listing.item_id,
+        listing_title: r.barter.listing.title,
+        listing_type: r.barter.listing.type,
+        created_at: r.created_at,
+      })),
+      average_rating: avgResult._avg.score || 0,
+      total_ratings: avgResult._count.score || 0,
     })
   } catch (error) {
     console.error("Get ratings error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
   }
 }
 
+// ---------------- POST create a rating ----------------
 export async function POST(request: NextRequest) {
   try {
-    const user = getUserFromRequest(request)
+    const user = await getUserFromRequest(request)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { barter_id, rated_user_id, rating, comment } = await request.json()
+    const body = await request.json()
 
-    if (!barter_id || !rated_user_id || !rating) {
-      return NextResponse.json({ error: "Barter ID, rated user ID, and rating are required" }, { status: 400 })
+    // ✅ Normalize and force to numbers
+    const barter_id = parseInt(body.barter_id, 10)
+    const rated_user_id = parseInt(body.rated_user_id, 10)
+    const score = body.score !== undefined ? Number(body.score) : Number(body.rating)
+    const comment = body.comment ?? null
+
+    // ✅ Validate inputs
+    if (isNaN(barter_id) || isNaN(rated_user_id) || isNaN(score)) {
+      return NextResponse.json(
+        { error: "Barter ID, rated user ID, and score are required" },
+        { status: 400 }
+      )
     }
 
-    if (rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5" }, { status: 400 })
+    if (score < 1 || score > 5) {
+      return NextResponse.json(
+        { error: "Score must be between 1 and 5" },
+        { status: 400 }
+      )
     }
 
     if (comment && comment.length > 250) {
-      return NextResponse.json({ error: "Comment must be 250 characters or less" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Comment must be 250 characters or less" },
+        { status: 400 }
+      )
     }
 
-    // Verify the barter exists and is completed
-    const barterResult = await pool.query(
-      `SELECT bo.*, l.user_id as listing_owner_id
-       FROM barter_offers bo
-       JOIN listings l ON bo.listing_id = l.id
-       WHERE bo.id = $1 AND bo.status = 'completed'`,
-      [barter_id],
-    )
+    // ✅ Verify barter exists and is completed
+    const barter = await prisma.barterOffer.findUnique({
+      where: { offer_id: barter_id },
+      include: { listing: true },
+    })
 
-    if (barterResult.rows.length === 0) {
-      return NextResponse.json({ error: "Barter not found or not completed" }, { status: 404 })
+    if (!barter || barter.status !== "completed") {
+      return NextResponse.json(
+        { error: "Barter not found or not completed" },
+        { status: 404 }
+      )
     }
 
-    const barter = barterResult.rows[0]
-
-    // Verify user is part of this barter
-    if (barter.offerer_id !== user.id && barter.listing_owner_id !== user.id) {
-      return NextResponse.json({ error: "You are not part of this barter" }, { status: 403 })
+    // ✅ Ensure user is part of the barter
+    const currentUserId = Number(user.user_id)
+    if (
+      barter.offerer_id !== currentUserId &&
+      barter.listing.user_id !== currentUserId
+    ) {
+      return NextResponse.json(
+        { error: "You are not part of this barter" },
+        { status: 403 }
+      )
     }
 
-    // Verify user is not rating themselves
-    if (rated_user_id === user.id) {
-      return NextResponse.json({ error: "Cannot rate yourself" }, { status: 400 })
+    // ✅ Prevent self-rating
+    if (rated_user_id === currentUserId) {
+      return NextResponse.json(
+        { error: "Cannot rate yourself" },
+        { status: 400 }
+      )
     }
 
-    // Verify the rated user is the other party in the barter
-    const expectedRatedUserId = barter.offerer_id === user.id ? barter.listing_owner_id : barter.offerer_id
+    // ✅ Ensure rated_user_id is the other party
+    const expectedRatedUserId =
+      barter.offerer_id === currentUserId
+        ? barter.listing.user_id
+        : barter.offerer_id
     if (rated_user_id !== expectedRatedUserId) {
-      return NextResponse.json({ error: "Can only rate the other party in the barter" }, { status: 400 })
+      return NextResponse.json(
+        { error: "Can only rate the other party in the barter" },
+        { status: 400 }
+      )
     }
 
-    // Check if rating already exists
-    const existingRating = await pool.query("SELECT id FROM ratings WHERE barter_id = $1 AND rater_id = $2", [
-      barter_id,
-      user.id,
-    ])
+    // ✅ Check if rating already exists
+    const existing = await prisma.rating.findUnique({
+      where: {
+        barter_id_rater_id: {
+          barter_id,
+          rater_id: currentUserId,
+        },
+      },
+    })
 
-    if (existingRating.rows.length > 0) {
-      return NextResponse.json({ error: "You have already rated this barter" }, { status: 400 })
+    if (existing) {
+      return NextResponse.json(
+        { error: "You have already rated this barter" },
+        { status: 400 }
+      )
     }
 
-    // Insert the rating
-    const result = await pool.query(
-      `INSERT INTO ratings (barter_id, rater_id, rated_user_id, rating, comment)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`,
-      [barter_id, user.id, rated_user_id, rating, comment],
-    )
+    // ✅ Create rating
+    const newRating = await prisma.rating.create({
+      data: {
+        barter_id,
+        rater_id: currentUserId,
+        rated_user_id,
+        score,
+        comment,
+      },
+    })
 
-    return NextResponse.json({ rating: result.rows[0] }, { status: 201 })
+    return NextResponse.json({ rating: newRating }, { status: 201 })
   } catch (error) {
     console.error("Create rating error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
   }
 }

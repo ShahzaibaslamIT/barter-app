@@ -7,9 +7,137 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//
-// Enums
-//
+model User {
+  user_id         Int             @id @default(autoincrement())
+  email           String          @unique
+  created_at      DateTime        @default(now())
+  password_hash   String?
+  username        String
+  location_text   String?
+  phone           String?
+  user_type       UserType        @default(both)
+  avatar_url      String?
+  rating          Float?
+  rating_count    Int?
+  offersMade      BarterOffer[]   @relation("OffersMade")
+  listings        Listing[]       @relation("UserListings")
+  messages        Message[]
+  lastSentThreads MessageThread[] @relation("LastSenderRelation")
+  threadsAsUser1  MessageThread[] @relation("User1Threads")
+  threadsAsUser2  MessageThread[] @relation("User2Threads")
+  ratingsReceived Rating[]        @relation("RatedRelation")
+  ratingsGiven    Rating[]        @relation("RaterRelation")
+}
+
+
+model Listing {
+  item_id        Int             @id @default(autoincrement())
+  user_id        Int
+  title          String
+  description    String
+  category       String
+  condition      String?
+  latitude       Float?
+  longitude      Float?
+  location       Bytes?          
+  is_active      Boolean         @default(true)
+  created_at     DateTime        @default(now())
+  availability   Json?
+  barter_request String?
+  photos         String[]
+  type           ListingType
+  location_text  String?
+  expires_at     DateTime?       @db.Timestamp(6)
+  listing_fee_usd Decimal?       @db.Decimal(10, 2)
+
+  offers         BarterOffer[]   @relation("ListingOffers")
+  offeredAs      BarterOffer[]   @relation("OfferedListingRelation")
+  user           User            @relation("UserListings", fields: [user_id], references: [user_id], onDelete: Cascade)
+  threads        MessageThread[] @relation("ListingThreads")
+
+  @@index([user_id])
+  @@index([category])
+  @@index([created_at])
+  @@index([expires_at])
+}
+
+
+model BarterOffer {
+  offer_id           Int            @id @default(autoincrement())
+  listing_id         Int
+  offerer_id         Int
+  offered_listing_id Int?
+  message            String?
+  status             OfferStatus    @default(pending)
+  created_at         DateTime       @default(now())
+  listing            Listing        @relation("ListingOffers", fields: [listing_id], references: [item_id])
+  offeredListing     Listing?       @relation("OfferedListingRelation", fields: [offered_listing_id], references: [item_id])
+  offerer            User           @relation("OffersMade", fields: [offerer_id], references: [user_id])
+  threads            MessageThread? @relation("BarterOfferThreads")
+  ratings            Rating[]
+
+  @@index([listing_id])
+  @@index([offerer_id])
+  @@index([created_at])
+}
+
+model Rating {
+  rating_id     Int         @id @default(autoincrement())
+  barter_id     Int
+  rater_id      Int
+  rated_user_id Int
+  score         Int
+  comment       String?
+  created_at    DateTime    @default(now())
+  barter        BarterOffer @relation(fields: [barter_id], references: [offer_id])
+  rated         User        @relation("RatedRelation", fields: [rated_user_id], references: [user_id])
+  rater         User        @relation("RaterRelation", fields: [rater_id], references: [user_id])
+
+  @@unique([barter_id, rater_id])
+}
+
+model MessageThread {
+  thread_id              Int          @id @default(autoincrement())
+  listing_id             Int?
+  barter_id              Int?         @unique
+  user1_id               Int
+  user2_id               Int
+  last_message           String?
+  last_message_sender_id Int?
+  last_message_at        DateTime?
+  created_at             DateTime     @default(now())
+  messages               Message[]
+  barter                 BarterOffer? @relation("BarterOfferThreads", fields: [barter_id], references: [offer_id])
+  lastSender             User?        @relation("LastSenderRelation", fields: [last_message_sender_id], references: [user_id])
+  listing                Listing?     @relation("ListingThreads", fields: [listing_id], references: [item_id])
+  user1                  User         @relation("User1Threads", fields: [user1_id], references: [user_id])
+  user2                  User         @relation("User2Threads", fields: [user2_id], references: [user_id])
+
+  @@index([listing_id])
+  @@index([barter_id])
+  @@index([user1_id, user2_id])
+  @@index([last_message_at])
+}
+
+model Message {
+  message_id Int           @id @default(autoincrement())
+  thread_id  Int
+  sender_id  Int
+  content    String
+  created_at DateTime      @default(now())
+  sender     User          @relation(fields: [sender_id], references: [user_id])
+  thread     MessageThread @relation(fields: [thread_id], references: [thread_id])
+
+  @@index([thread_id, created_at])
+}
+
+model AppSettings {
+  id                  Int      @id @default(1)
+  listing_fee_usd     Decimal  @default(0.99) @db.Decimal(10, 2)
+  listing_expiry_days Int      @default(30)
+  updated_at          DateTime @updatedAt
+}
+
 enum UserType {
   service_provider
   item_owner
@@ -26,106 +154,9 @@ enum OfferStatus {
   accepted
   declined
   withdrawn
-  completed   // ✅ Added this for rating support
+  completed
+  cancelled
 }
 
-//
-// User Model
-//
-model User {
-  user_id       Int       @id @default(autoincrement())
-  username      String
-  email         String    @unique
-  password_hash String
-  user_type     UserType  @default(both)
-  phone         String?
-  location_text String?
 
-  avatar_url    String?
-  rating        Float?
-  rating_count  Int?
 
-  created_at    DateTime  @default(now())
-
-  listings      Listing[]     @relation("UserListings")
-  offersMade    BarterOffer[] @relation("OffersMade")
-
-  // ✅ Ratings
-  ratingsGiven  Rating[] @relation("RaterRelation")
-  ratingsReceived Rating[] @relation("RatedRelation")
-}
-
-//
-// Listing Model
-//
-model Listing {
-  item_id        Int         @id @default(autoincrement())
-  user_id        Int
-  type           ListingType
-  title          String
-  description    String
-  category       String
-  barter_request String?
-  photos         String[]
-  condition      String?
-  availability   Json?
-  latitude       Float?
-  longitude      Float?
-  location_text  String?
-  is_active      Boolean     @default(true)
-  created_at     DateTime    @default(now())
-
-  user User @relation(fields: [user_id], references: [user_id], name: "UserListings", onDelete: Cascade)
-
-  offers         BarterOffer[] @relation("ListingOffers")
-  offeredAs      BarterOffer[] @relation("OfferedListingRelation")
-
-  @@index([user_id])
-  @@index([category])
-  @@index([created_at])
-}
-
-//
-// BarterOffer Model
-//
-model BarterOffer {
-  offer_id           Int        @id @default(autoincrement())
-  listing_id         Int
-  offerer_id         Int
-  offered_listing_id Int?
-  message            String?
-  status             OfferStatus @default(pending)
-  created_at         DateTime   @default(now())
-
-  listing        Listing  @relation("ListingOffers", fields: [listing_id], references: [item_id])
-  offeredListing Listing? @relation("OfferedListingRelation", fields: [offered_listing_id], references: [item_id])
-  offerer        User     @relation("OffersMade", fields: [offerer_id], references: [user_id])
-
-  // ✅ Ratings
-  ratings        Rating[]
-
-  @@index([listing_id])
-  @@index([offerer_id])
-  @@index([status])
-  @@index([created_at])
-}
-
-//
-// Rating Model ✅ NEW
-//
-model Rating {
-  rating_id     Int    @id @default(autoincrement())
-  barter_id     Int
-  rater_id      Int
-  rated_user_id Int
-  score         Int    // 1–5 stars
-  comment       String?
-
-  barter BarterOffer @relation(fields: [barter_id], references: [offer_id])
-  rater  User        @relation("RaterRelation", fields: [rater_id], references: [user_id])
-  rated  User        @relation("RatedRelation", fields: [rated_user_id], references: [user_id])
-
-  created_at DateTime @default(now())
-
-  @@unique([barter_id, rater_id]) // one rating per user per barter
-}

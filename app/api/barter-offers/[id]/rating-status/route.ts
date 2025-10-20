@@ -4,15 +4,17 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = getUserFromRequest(request)
+    const user = await getUserFromRequest(request)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const offerId = Number(params.id)
+    // ✅ Await params
+    const { id } = await context.params
+    const offerId = Number(id)
     if (!Number.isFinite(offerId)) {
       return NextResponse.json({ error: "Invalid offer id" }, { status: 400 })
     }
@@ -34,7 +36,7 @@ export async function GET(
       return NextResponse.json({ error: "Barter not found" }, { status: 404 })
     }
 
-    const currentUserId = Number(user.id)
+    const currentUserId = Number(user.user_id)
 
     // ✅ Ensure current user is part of the barter
     const isOfferer = barter.offerer_id === currentUserId
@@ -65,13 +67,10 @@ export async function GET(
       },
     })
 
-    const userRatedOther = ratings.find(r => r.rater_id === currentUserId)
-    const otherRatedUser = ratings.find(r => r.rated_user_id === currentUserId)
+    const userRatedOther = ratings.find((r) => r.rater_id === currentUserId)
+    const otherRatedUser = ratings.find((r) => r.rated_user_id === currentUserId)
 
-    // ✅ If your OfferStatus enum doesn’t yet include "completed",
-    //    cast to string to avoid TS error
-    const canRate =
-      barter.status === ("completed" as any) && !userRatedOther
+    const canRate = barter.status === "completed" && !userRatedOther
 
     return NextResponse.json({
       barter: {

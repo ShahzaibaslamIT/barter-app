@@ -20,19 +20,29 @@ import {
 
 interface Offer {
   offer_id: number
-  status: "pending" | "accepted" | "declined" | "completed" | "cancelled"
+  listing_id: number
+  offerer_id: number
+  status: "pending" | "accepted" | "declined" | "withdrawn" | "completed"| "cancelled"
   message?: string
   created_at: string
-  listing_title: string
-  listing_type: "item" | "service"
-  listing_photos: string[]
-  offered_listing_title?: string
-  offered_listing_type?: "item" | "service"
-  offered_listing_photos?: string[]
-  offerer_name?: string
-  offerer_avatar?: string
-  listing_owner_name?: string
-  listing_owner_avatar?: string
+  listing?: {   // 🔹 made optional
+    item_id: number
+    user_id: number
+    title: string
+    photos: string[]
+    type?: "item" | "service"
+  }
+  offeredListing?: {
+    item_id: number
+    title: string
+    photos: string[]
+    type?: "item" | "service"
+  } | null
+  offerer?: {
+    user_id: number
+    username: string
+    avatar_url?: string
+  }
 }
 
 interface OfferCardProps {
@@ -76,7 +86,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
   }
 
   const handleStatusUpdate = async (
-    newStatus: "accepted" | "declined" | "cancelled" | "completed"
+    newStatus: "accepted" | "declined" | "withdrawn" | "completed"
   ) => {
     setIsLoading(true)
     try {
@@ -118,29 +128,49 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
   const handleContinueInMessages = async () => {
     try {
       const token = localStorage.getItem("auth_token")
+      if (!token) {
+        router.push("/auth")
+        return
+      }
+
+      const otherUserId =
+        type === "sent" ? offer.listing?.user_id : offer.offerer_id
+
+      if (!otherUserId) {
+        toast({
+          title: "Error",
+          description: "Other user information missing",
+          variant: "destructive",
+        })
+        return
+      }
+
       const response = await fetch("/api/messages/threads", {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          listing_id: offer.listing_id,
+          barter_id: offer.offer_id,
+          other_user_id: otherUserId,
+        }),
       })
 
       const data = await response.json()
-      if (response.ok) {
-        const thread = data.threads.find(
-          (t: any) => t.barter_id === offer.offer_id
-        )
-        if (thread) {
-          router.push(`/messages/${thread.thread_id}`)
-        } else {
-          toast({
-            title: "Error",
-            description: "Message thread not found",
-            variant: "destructive",
-          })
-        }
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create/find thread")
       }
+
+      router.push(`/messages/${data.thread.thread_id}`)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to find message thread",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to start conversation",
         variant: "destructive",
       })
     }
@@ -162,7 +192,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       case "accepted":
         return <CheckCircle className="h-4 w-4 text-green-500" />
       case "declined":
-      case "cancelled":
+      case "withdrawn":
         return <XCircle className="h-4 w-4 text-red-500" />
       case "completed":
         return <CheckCircle className="h-4 w-4 text-blue-500" />
@@ -178,7 +208,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       case "accepted":
         return "bg-green-100 text-green-800"
       case "declined":
-      case "cancelled":
+      case "withdrawn":
         return "bg-red-100 text-red-800"
       case "completed":
         return "bg-blue-100 text-blue-800"
@@ -188,9 +218,11 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
   }
 
   const otherUser =
-    type === "sent" ? offer.listing_owner_name : offer.offerer_name
+    type === "sent"
+      ? `Owner #${offer.listing?.user_id ?? "?"}`
+      : offer.offerer?.username
   const otherUserAvatar =
-    type === "sent" ? offer.listing_owner_avatar : offer.offerer_avatar
+    type === "sent" ? undefined : offer.offerer?.avatar_url
 
   return (
     <>
@@ -209,69 +241,55 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
         <CardContent className="space-y-4">
           {/* Target Listing */}
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">
-              {type === "sent" ? "Your offer for:" : "Offer for your listing:"}
-            </p>
-            <div className="flex gap-3 p-3 bg-muted/50 rounded-lg">
-              <img
-                src={offer.listing_photos?.[0] || "/placeholder.svg"}
-                alt={offer.listing_title}
-                className="w-12 h-12 object-cover rounded-lg"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge
-                    variant={
-                      offer.listing_type === "item" ? "default" : "secondary"
-                    }
-                    className="text-xs"
-                  >
-                    {offer.listing_type === "item" ? (
-                      <Package className="h-3 w-3 mr-1" />
-                    ) : (
-                      <Wrench className="h-3 w-3 mr-1" />
-                    )}
-                    {offer.listing_type}
-                  </Badge>
-                </div>
-                <h4 className="font-medium text-sm">{offer.listing_title}</h4>
-              </div>
-            </div>
-          </div>
-
-          {/* Offered Listing */}
-          {offer.offered_listing_title && (
+          {offer.listing && (
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">
-                {type === "sent" ? "You offered:" : "They offered:"}
+                {type === "sent"
+                  ? "Your offer for:"
+                  : "Offer for your listing:"}
               </p>
-              <div className="flex gap-3 p-3 bg-primary/5 rounded-lg">
+              <div className="flex gap-3 p-3 bg-muted/50 rounded-lg">
                 <img
-                  src={offer.offered_listing_photos?.[0] || "/placeholder.svg"}
-                  alt={offer.offered_listing_title}
+                  src={offer.listing.photos?.[0] || "/placeholder.svg"}
+                  alt={offer.listing.title}
                   className="w-12 h-12 object-cover rounded-lg"
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge
                       variant={
-                        offer.offered_listing_type === "item"
+                        offer.listing.type === "item"
                           ? "default"
                           : "secondary"
                       }
                       className="text-xs"
                     >
-                      {offer.offered_listing_type === "item" ? (
-                        <Package className="h-3 w-3 mr-1" />
-                      ) : (
-                        <Wrench className="h-3 w-3 mr-1" />
-                      )}
-                      {offer.offered_listing_type}
+                      {offer.listing.type}
                     </Badge>
                   </div>
                   <h4 className="font-medium text-sm">
-                    {offer.offered_listing_title}
+                    {offer.listing.title}
+                  </h4>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Offered Listing */}
+          {offer.offeredListing && (
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                {type === "sent" ? "You offered:" : "They offered:"}
+              </p>
+              <div className="flex gap-3 p-3 bg-primary/5 rounded-lg">
+                <img
+                  src={offer.offeredListing.photos?.[0] || "/placeholder.svg"}
+                  alt={offer.offeredListing.title}
+                  className="w-12 h-12 object-cover rounded-lg"
+                />
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm">
+                    {offer.offeredListing.title}
                   </h4>
                 </div>
               </div>
@@ -333,7 +351,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleStatusUpdate("cancelled")}
+                  onClick={() => handleStatusUpdate("withdrawn")}
                   disabled={isLoading}
                   className="flex-1 bg-transparent"
                 >
@@ -365,7 +383,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
             </div>
           )}
 
-          {/* Rating functionality */}
+          {/* Rating */}
           {offer.status === "completed" && canRate && !hasRated && (
             <Button
               size="sm"
@@ -376,7 +394,6 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
               Rate Experience
             </Button>
           )}
-
           {offer.status === "completed" && hasRated && (
             <div className="text-center py-2">
               <p className="text-sm text-muted-foreground">
@@ -393,12 +410,12 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
         onClose={() => setShowRatingDialog(false)}
         barter={{
           id: offer.offer_id.toString(),
-          listing_title: offer.listing_title,
+          listing_title: offer.listing?.title ?? "Unknown Listing",
           other_user_name: otherUser || "",
           other_user_id:
             type === "sent"
-              ? offer.listing_owner_name || ""
-              : offer.offerer_name || "",
+              ? offer.listing?.user_id?.toString() ?? ""
+              : offer.offerer_id.toString(),
         }}
         onSuccess={() => {
           setHasRated(true)

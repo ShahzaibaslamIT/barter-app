@@ -1,108 +1,190 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { neon } from "@neondatabase/serverless"
+// // app/api/listings/nearby/route.ts
+// import { type NextRequest, NextResponse } from "next/server"
+// import { prisma } from "@/lib/prisma"
 
-const sql = neon(process.env.DATABASE_URL!)
+// export async function GET(request: NextRequest) {
+//   try {
+//     const { searchParams } = new URL(request.url)
+//     const latitude = parseFloat(searchParams.get("latitude") || "0")
+//     const longitude = parseFloat(searchParams.get("longitude") || "0")
+//     const radius = parseFloat(searchParams.get("radius") || "10") // km
+//     const type = searchParams.get("type")
+//     const category = searchParams.get("category")
+//     const limit = parseInt(searchParams.get("limit") || "20")
+//     const offset = parseInt(searchParams.get("offset") || "0")
+
+//     if (!latitude || !longitude) {
+//       return NextResponse.json({ error: "Latitude and longitude are required" }, { status: 400 })
+//     }
+
+//     // ✅ Nearby listings query
+//     const Listing =  prisma.$queryRawUnsafe<any[]>(`
+//       SELECT 
+//         l.item_id,
+//         l.title,
+//         l.description,
+//         l.category,
+//         l.condition,
+//         l.latitude,
+//         l.longitude,
+//         l.photos,
+//         l.barter_request,
+//         l.type,
+//         l.location_text,
+//         l.created_at,
+//         u.user_id,
+//         u.username AS user_name,
+//         u.avatar_url AS user_avatar,
+//         ST_Distance(
+//           l.location,
+//           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+//         ) / 1000 AS distance_km,
+//         (
+//           SELECT COALESCE(AVG(score), 0)::FLOAT 
+//           FROM ratings r 
+//           WHERE r.rated_user_id = l.user_id
+//         ) AS user_rating,
+//         (
+//           SELECT COUNT(*)::INT 
+//           FROM ratings r 
+//           WHERE r.rated_user_id = l.user_id
+//         ) AS user_rating_count
+//       FROM Listing l
+//       JOIN users u ON l.user_id = u.user_id
+//       WHERE l.is_active = true
+//         AND l.location IS NOT NULL
+//         AND ST_DWithin(
+//           l.location,
+//           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
+//           ${radius * 1000}
+//         )
+//         ${type ? `AND l.type = '${type}'` : ""}
+//         ${category ? `AND l.category = '${category}'` : ""}
+//       ORDER BY distance_km ASC, l.created_at DESC
+//       LIMIT ${limit} OFFSET ${offset};
+//     `)
+
+//     // ✅ Count query for pagination
+//     const countResult = await prisma.$queryRawUnsafe<any[]>(`
+//       SELECT COUNT(*)::INT AS total
+//       FROM Listing l
+//       WHERE l.is_active = true
+//         AND l.location IS NOT NULL
+//         AND ST_DWithin(
+//           l.location,
+//           ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
+//           ${radius * 1000}
+//         )
+//         ${type ? `AND l.type = '${type}'` : ""}
+//         ${category ? `AND l.category = '${category}'` : ""};
+//     `)
+
+//     const total = countResult?.[0]?.total || 0
+
+//     return NextResponse.json({
+//       Listing,
+//       pagination: { total, limit, offset, hasMore: offset + limit < total },
+//     })
+//   } catch (error) {
+//     console.error("❌ Error fetching nearby listings:", error)
+//     return NextResponse.json({ error: "Failed to fetch nearby listings" }, { status: 500 })
+//   }
+// }
+
+
+// app/api/listings/nearby/route.ts
+
+
+// app/api/listings/nearby/route.ts
+import { type NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const latitude = Number.parseFloat(searchParams.get("latitude") || "0")
-    const longitude = Number.parseFloat(searchParams.get("longitude") || "0")
-    const radius = Number.parseFloat(searchParams.get("radius") || "10") // Default 10km
-    const type = searchParams.get("type") // 'item' or 'service'
+    const latitude = parseFloat(searchParams.get("latitude") || "0")
+    const longitude = parseFloat(searchParams.get("longitude") || "0")
+    const radius = parseFloat(searchParams.get("radius") || "10") // km
+    const type = searchParams.get("type")
     const category = searchParams.get("category")
-    const limit = Number.parseInt(searchParams.get("limit") || "20")
-    const offset = Number.parseInt(searchParams.get("offset") || "0")
+    const limit = parseInt(searchParams.get("limit") || "20")
+    const offset = parseInt(searchParams.get("offset") || "0")
 
     if (!latitude || !longitude) {
       return NextResponse.json({ error: "Latitude and longitude are required" }, { status: 400 })
     }
 
-    // Build the query with location-based filtering
-    let query = `
+    // ✅ Use "Listing" (quoted) because your table is capitalized
+    const listings = await prisma.$queryRawUnsafe<any[]>(`
       SELECT 
-        l.*,
-        u.name as user_name,
-        u.avatar_url as user_avatar,
+        l.item_id,
+        l.title,
+        l.description,
+        l.category,
+        l.condition,
+        l.latitude,
+        l.longitude,
+        l.photos,
+        l.barter_request,
+        l.type,
+        l.location_text,
+        l.created_at,
+        u.user_id,
+        u.username AS user_name,
+        u.avatar_url AS user_avatar,
         ST_Distance(
           l.location,
-          ST_GeogFromText('POINT(${longitude} ${latitude})')
-        ) / 1000 as distance_km,
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography
+        ) / 1000 AS distance_km,
         (
-          SELECT AVG(rating)::FLOAT 
-          FROM ratings r 
+          SELECT COALESCE(AVG(score), 0)::FLOAT 
+          FROM "Rating" r 
           WHERE r.rated_user_id = l.user_id
-        ) as user_rating,
+        ) AS user_rating,
         (
           SELECT COUNT(*)::INT 
-          FROM ratings r 
+          FROM "Rating" r 
           WHERE r.rated_user_id = l.user_id
-        ) as user_rating_count
-      FROM listings l
-      JOIN users u ON l.user_id = u.id
+        ) AS user_rating_count
+      FROM "Listing" l
+      JOIN "User" u ON l.user_id = u.user_id
       WHERE l.is_active = true
+        AND l.location IS NOT NULL
         AND ST_DWithin(
           l.location,
-          ST_GeogFromText('POINT(${longitude} ${latitude})'),
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
           ${radius * 1000}
         )
-    `
-
-    const params: any[] = []
-
-    if (type) {
-      query += ` AND l.type = $${params.length + 1}`
-      params.push(type)
-    }
-
-    if (category) {
-      query += ` AND l.category = $${params.length + 1}`
-      params.push(category)
-    }
-
-    query += `
+        ${type ? `AND l.type = '${type}'` : ""}
+        ${category ? `AND l.category = '${category}'` : ""}
       ORDER BY distance_km ASC, l.created_at DESC
-      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
-    `
-    params.push(limit, offset)
+      LIMIT ${limit} OFFSET ${offset};
+    `)
 
-    const listings = await sql(query, params)
-
-    // Get total count for pagination
-    let countQuery = `
-      SELECT COUNT(*) as total
-      FROM listings l
+    const countResult = await prisma.$queryRawUnsafe<any[]>(`
+      SELECT COUNT(*)::INT AS total
+      FROM "Listing" l
       WHERE l.is_active = true
+        AND l.location IS NOT NULL
         AND ST_DWithin(
           l.location,
-          ST_GeogFromText('POINT(${longitude} ${latitude})'),
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography,
           ${radius * 1000}
         )
-    `
+        ${type ? `AND l.type = '${type}'` : ""}
+        ${category ? `AND l.category = '${category}'` : ""};
+    `)
 
-    const countParams: any[] = []
-    if (type) {
-      countQuery += ` AND l.type = $${countParams.length + 1}`
-      countParams.push(type)
-    }
-    if (category) {
-      countQuery += ` AND l.category = $${countParams.length + 1}`
-      countParams.push(category)
-    }
-
-    const [{ total }] = await sql(countQuery, countParams)
+    const total = countResult?.[0]?.total || 0
 
     return NextResponse.json({
       listings,
-      pagination: {
-        total: Number.parseInt(total),
-        limit,
-        offset,
-        hasMore: offset + limit < Number.parseInt(total),
-      },
+      pagination: { total, limit, offset, hasMore: offset + limit < total },
     })
   } catch (error) {
-    console.error("Error fetching nearby listings:", error)
+    console.error("❌ Error fetching nearby listings:", error)
     return NextResponse.json({ error: "Failed to fetch nearby listings" }, { status: 500 })
   }
 }
+
+

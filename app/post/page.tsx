@@ -22,7 +22,7 @@ export default function PostPage() {
           <ListingForm
             type={selectedType}
             onSuccess={() => {
-              router.push("/")
+              router.push("/home")
             }}
           />
         </div>
