@@ -655,7 +655,7 @@ export default function ListingDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push(`/profile/${listing.user_id}`)}
+                onClick={() => router.push(`/profile/`)}
               >
                 View Profile
               </Button>

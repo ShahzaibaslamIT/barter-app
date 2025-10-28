@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "lint": "next lint",
+    "dev": "dotenv -e .env.local -- next dev",
+    "build": "dotenv -e .env.production -- next build",
     "start": "next start"
   },
   "dependencies": {
@@ -44,6 +43,7 @@
     "autoprefixer": "^10.4.20",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
@@ -78,6 +78,7 @@
     "@types/node": "^22.18.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^10.0.0",
     "postcss": "^8.5",
     "prisma": "^6.16.1",
     "tailwindcss": "^4.1.9",
