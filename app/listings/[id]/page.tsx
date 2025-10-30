@@ -653,12 +653,16 @@ export default function ListingDetailPage() {
                 )}
               </div>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(`/profile/`)}
-              >
-                View Profile
-              </Button>
+  variant="outline"
+  size="sm"
+  disabled={!listing.user_id}
+  onClick={() => {
+    if (listing.user_id) router.push(`/profile/${listing.user_id}`)
+  }}
+>
+  View Profile
+</Button>
+
             </div>
           </CardContent>
         </Card>
