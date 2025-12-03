@@ -151,12 +151,12 @@ export async function POST(request: NextRequest) {
 
     // ✅ Ensure a message thread exists
     const thread = await prisma.messageThread.upsert({
-      where: { barter_id: offer.offer_id }, // barter_id is unique
+      where: { barter_id: offer.offer_id },
       create: {
         barter_id: offer.offer_id,
         listing_id: offer.listing_id,
-        user1_id: Number(user.user_id), // offerer
-        user2_id: offer.listing.user_id, // listing owner
+        user1_id: Number(user.user_id),
+        user2_id: offer.listing.user_id,
         last_message: message || null,
         last_message_sender_id: Number(user.user_id),
         last_message_at: new Date(),
@@ -203,18 +203,14 @@ export async function GET(request: NextRequest) {
     }
 
     // ✅ Decide which filter to apply
-    let whereClause = {}
+    let whereClause: any = {}
     if (type === "sent") {
-      whereClause = { offerer_id: userId } // Only offers made by this user
+      whereClause = { offerer_id: userId }
     } else if (type === "received") {
-      whereClause = { listing: { user_id: userId } } // Only offers received by this user
+      whereClause = { listing: { user_id: userId } }
     } else {
-      // Fallback: show both (optional)
       whereClause = {
-        OR: [
-          { offerer_id: userId },
-          { listing: { user_id: userId } },
-        ],
+        OR: [{ offerer_id: userId }, { listing: { user_id: userId } }],
       }
     }
 
@@ -246,24 +242,41 @@ export async function GET(request: NextRequest) {
       },
     })
 
+    // ✅ Flattened + nested format with listing.user_id exposed
     const formatted = offers.map((o) => ({
       offer_id: o.offer_id,
       listing_id: o.listing_id,
       offerer_id: o.offerer_id,
-      listing_owner_id: o.listing.user_id,
       status: o.status,
       message: o.message,
       created_at: o.created_at,
-      listing_title: o.listing.title,
-      listing_type: o.listing.type,
-      listing_photos: o.listing.photos,
-      offered_listing_title: o.offeredListing?.title ?? null,
-      offered_listing_type: o.offeredListing?.type ?? null,
-      offered_listing_photos: o.offeredListing?.photos ?? [],
-      offerer_name: o.offerer.username,
-      offerer_avatar: o.offerer.avatar_url,
-      listing_owner_name: o.listing.user.username,
-      listing_owner_avatar: o.listing.user.avatar_url,
+
+      listing: {
+        item_id: o.listing.item_id,
+        title: o.listing.title,
+        type: o.listing.type,
+        photos: o.listing.photos,
+        user_id: o.listing.user_id, // ✅ this is the fix!
+        user: {
+          username: o.listing.user.username,
+          avatar_url: o.listing.user.avatar_url,
+        },
+      },
+
+      offeredListing: o.offeredListing
+        ? {
+            item_id: o.offeredListing.item_id,
+            title: o.offeredListing.title,
+            type: o.offeredListing.type,
+            photos: o.offeredListing.photos,
+          }
+        : null,
+
+      offerer: {
+        user_id: o.offerer.user_id,
+        username: o.offerer.username,
+        avatar_url: o.offerer.avatar_url,
+      },
     }))
 
     return NextResponse.json({ offers: formatted }, { status: 200 })

@@ -8,10 +8,10 @@ datasource db {
 }
 
 model User {
-  user_id         Int             @id @default(autoincrement())
   email           String          @unique
   created_at      DateTime        @default(now())
   password_hash   String?
+  user_id         Int             @id @default(autoincrement())
   username        String
   location_text   String?
   phone           String?
@@ -19,6 +19,9 @@ model User {
   avatar_url      String?
   rating          Float?
   rating_count    Int?
+  otp_code        String?
+  otp_expires     DateTime?
+  email_verified  Boolean         @default(false)
   offersMade      BarterOffer[]   @relation("OffersMade")
   listings        Listing[]       @relation("UserListings")
   messages        Message[]
@@ -29,38 +32,35 @@ model User {
   ratingsGiven    Rating[]        @relation("RaterRelation")
 }
 
-
 model Listing {
-  item_id        Int             @id @default(autoincrement())
-  user_id        Int
-  title          String
-  description    String
-  category       String
-  condition      String?
-  latitude       Float?
-  longitude      Float?
-  location       Bytes?          
-  is_active      Boolean         @default(true)
-  created_at     DateTime        @default(now())
-  availability   Json?
-  barter_request String?
-  photos         String[]
-  type           ListingType
-  location_text  String?
-  expires_at     DateTime?       @db.Timestamp(6)
-  listing_fee_usd Decimal?       @db.Decimal(10, 2)
-
-  offers         BarterOffer[]   @relation("ListingOffers")
-  offeredAs      BarterOffer[]   @relation("OfferedListingRelation")
-  user           User            @relation("UserListings", fields: [user_id], references: [user_id], onDelete: Cascade)
-  threads        MessageThread[] @relation("ListingThreads")
-
+  item_id         Int             @id @default(autoincrement())
+  user_id         Int
+  title           String
+  description     String
+  category        String
+  condition       String?
+  latitude        Float?
+  longitude       Float?
+  is_active       Boolean         @default(true)
+  created_at      DateTime        @default(now())
+  availability    Json?
+  barter_request  String?
+  photos          String[]
+  type            ListingType
+  location_text   String?
+  expires_at      DateTime?       @db.Timestamp(6)
+  listing_fee_usd Decimal?        @db.Decimal(10, 2)
+  location        Bytes?
+  offers          BarterOffer[]   @relation("ListingOffers")
+  offeredAs       BarterOffer[]   @relation("OfferedListingRelation")
+  user            User            @relation("UserListings", fields: [user_id], references: [user_id], onDelete: Cascade)
+  threads         MessageThread[] @relation("ListingThreads")
+  
   @@index([user_id])
   @@index([category])
   @@index([created_at])
   @@index([expires_at])
 }
-
 
 model BarterOffer {
   offer_id           Int            @id @default(autoincrement())
@@ -157,6 +157,3 @@ enum OfferStatus {
   completed
   cancelled
 }
-
-
-

@@ -315,17 +315,17 @@
 //   )
 // }
 
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BottomNav } from "@/components/ui/bottom-nav"
-import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BottomNav } from "@/components/ui/bottom-nav";
+import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
+import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
   MapPin,
@@ -333,132 +333,125 @@ import {
   Package,
   Wrench,
   MessageCircle,
-  Heart,
-  Share,
-} from "lucide-react"
+} from "lucide-react";
 
 interface Listing {
-  item_id: number
-  type: "item" | "service"
-  title: string
-  description: string
-  category: string
-  location_text: string
-  barter_request?: string
-  photos: string[]
-  condition?: string
-  availability?: any
-  skill_level?: string
-  user_id: number
-  user_name: string
-  user_avatar?: string
-  user_rating: number
-  rating_count: number
-  created_at: string
+  item_id: number;
+  type: "item" | "service";
+  title: string;
+  description: string;
+  category: string;
+  location_text: string;
+  barter_request?: string;
+  photos: string[];
+  condition?: string;
+  availability?: any;
+  skill_level?: string;
+  user_id: number;
+  user_name: string;
+  user_avatar?: string;
+  user_rating: number;
+  rating_count: number;
+  created_at: string;
 }
 
 export default function ListingDetailPage() {
-  const params = useParams<{ id: string }>()
-  const [listing, setListing] = useState<Listing | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showMakeOfferDialog, setShowMakeOfferDialog] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  const params = useParams<{ id: string }>();
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showMakeOfferDialog, setShowMakeOfferDialog] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!params?.id) return
-    fetchListing(params.id)
-  }, [params?.id])
+    if (!params?.id) return;
+    fetchListing(params.id);
+  }, [params?.id]);
 
   const fetchListing = async (id: string) => {
     try {
-      const response = await fetch(`/api/listings/${id}`)
-      const data = await response.json()
+      const response = await fetch(`/api/listings/${id}`);
+      const data = await response.json();
 
       if (response.ok) {
-        setListing(data.listing)
+        setListing(data.listing);
       } else {
-        console.error("Failed to fetch listing:", data.error)
+        console.error("Failed to fetch listing:", data.error);
       }
     } catch (error) {
-      console.error("Failed to fetch listing:", error)
+      console.error("Failed to fetch listing:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
-  const handleOfferSuccess = async (listing: Listing, barterId?: number) => {
+  // ✅ Create or open thread
+  const handleOpenConversation = async (targetUserId: number, listingId: number) => {
     try {
-      setShowMakeOfferDialog(false)
-
-      if (!listing.user_id) {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
         toast({
-          title: "Can't start chat",
-          description: "Listing owner information missing.",
+          title: "Login required",
+          description: "Please sign in to send a message.",
           variant: "destructive",
-        })
-        return
+        });
+        router.push("/auth");
+        return;
       }
-
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("auth_token")
-          : null
 
       const res = await fetch("/api/messages/threads", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          listing_id: listing.item_id,
-          barter_id: barterId ?? null,
-          other_user_id: listing.user_id,
+          listing_id: listingId,
+          other_user_id: targetUserId,
         }),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
       if (!res.ok) {
-        console.error("Create thread error:", data)
         toast({
           title: "Error",
-          description: data.error || "Failed to create conversation",
+          description: data.error || "Failed to open conversation.",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
 
       const threadId =
-        data.thread?.thread_id ?? data.thread?.id ?? data.id ?? null
+        data.thread?.thread_id ?? data.thread?.id ?? data.id ?? null;
+
       if (!threadId) {
         toast({
           title: "Error",
-          description: "Thread id missing from server response",
+          description: "Thread ID missing from server response.",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
 
-      router.push(`/messages/${threadId}`)
+      router.push(`/messages/${threadId}`);
     } catch (err) {
-      console.error("handleOfferSuccess error:", err)
+      console.error("handleOpenConversation error:", err);
       toast({
         title: "Error",
         description: "Could not start conversation.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -466,7 +459,7 @@ export default function ListingDetailPage() {
         <p className="text-muted-foreground">Loading listing...</p>
         <BottomNav />
       </div>
-    )
+    );
   }
 
   if (!listing) {
@@ -478,13 +471,13 @@ export default function ListingDetailPage() {
         </div>
         <BottomNav />
       </div>
-    )
+    );
   }
 
   const images =
     listing.photos.length > 0
       ? listing.photos
-      : ["/real-estate-listing-modern.png"]
+      : ["/real-estate-listing-modern.png"];
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -495,14 +488,6 @@ export default function ListingDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              <Heart className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Share className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       </header>
 
@@ -653,16 +638,15 @@ export default function ListingDetailPage() {
                 )}
               </div>
               <Button
-  variant="outline"
-  size="sm"
-  disabled={!listing.user_id}
-  onClick={() => {
-    if (listing.user_id) router.push(`/profile/${listing.user_id}`)
-  }}
->
-  View Profile
-</Button>
-
+                variant="outline"
+                size="sm"
+                disabled={!listing.user_id}
+                onClick={() => {
+                  if (listing.user_id) router.push(`/profile/${listing.user_id}`);
+                }}
+              >
+                View Profile
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -676,7 +660,7 @@ export default function ListingDetailPage() {
           <Button
             variant="outline"
             className="flex-1 bg-transparent"
-            onClick={() => router.push(`/messages/new?user=${listing.user_id}`)}
+            onClick={() => handleOpenConversation(listing.user_id, listing.item_id)}
           >
             <MessageCircle className="h-4 w-4 mr-2" />
             Message
@@ -695,10 +679,10 @@ export default function ListingDetailPage() {
           user_id: listing.user_id,
           user_name: listing.user_name,
         }}
-        onSuccess={() => handleOfferSuccess(listing)}
+        onSuccess={() => handleOpenConversation(listing.user_id, listing.item_id)}
       />
 
       <BottomNav />
     </div>
-  )
+  );
 }

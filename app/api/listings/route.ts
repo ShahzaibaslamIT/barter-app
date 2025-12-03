@@ -310,6 +310,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUserFromRequest } from "@/lib/auth"
 
+
+
 // ------------------- GET (fetch listings) -------------------
 export async function GET(request: NextRequest) {
   try {
@@ -460,13 +462,18 @@ export async function POST(request: NextRequest) {
     })
 
     // ✅ Update PostGIS geometry using SQL directly
-    if (latitude && longitude) {
-      await prisma.$executeRawUnsafe(`
-        UPDATE "Listing"
-        SET location = ST_SetSRID(ST_MakePoint(${Number(longitude)}, ${Number(latitude)}), 4326)
-        WHERE item_id = ${listing.item_id};
-      `)
-    }
+  prisma.$executeRawUnsafe(`
+  UPDATE "Listing"
+  SET location = ST_SetSRID(
+    ST_MakePoint(
+      ${Number(longitude)}::double precision,
+      ${Number(latitude)}::double precision
+    ),
+    4326
+  )
+  WHERE item_id = ${listing.item_id};
+`)
+
 
     // ✅ Return enriched listing with user info
     const updated = await prisma.listing.findUnique({
