@@ -521,3 +521,201 @@ export async function OPTIONS() {
     },
   })
 }
+
+
+// // ✅ app/api/listings/route.ts
+// export const runtime = "nodejs"
+
+// import { NextRequest, NextResponse } from "next/server"
+// import { prisma } from "@/lib/prisma"
+// import { getUserFromRequest } from "@/lib/auth"
+
+// // ------------------- GET (fetch listings) -------------------
+// export async function GET(request: NextRequest) {
+//   try {
+//     // ✅ AUTO-DEACTIVATE EXPIRED LISTINGS (LOCAL + PROD SAFE)
+//     await prisma.listing.updateMany({
+//       where: {
+//         expires_at: { lt: new Date() },
+//         is_active: true,
+//       },
+//       data: { is_active: false },
+//     })
+
+//     const { searchParams } = new URL(request.url)
+//     const category = searchParams.get("category") || undefined
+//     const type = searchParams.get("type") || undefined
+//     const limit = Math.min(Number(searchParams.get("limit") || 20), 100)
+//     const offset = Math.max(Number(searchParams.get("offset") || 0), 0)
+
+//     const sort = (searchParams.get("sort") || "recent").toLowerCase()
+//     const orderBy =
+//       sort === "oldest" ? { created_at: "asc" as const } : { created_at: "desc" as const }
+
+//     const where: any = { is_active: true }
+//     if (category) where.category = category
+//     if (type) where.type = type
+
+//     const listings = await prisma.listing.findMany({
+//       where,
+//       select: {
+//         item_id: true,
+//         title: true,
+//         description: true,
+//         category: true,
+//         condition: true,
+//         latitude: true,
+//         longitude: true,
+//         location_text: true,
+//         type: true,
+//         created_at: true,
+//         expires_at: true,
+//         listing_fee_usd: true,
+//         photos: true,
+//         barter_request: true,
+//         user: {
+//           select: {
+//             user_id: true,
+//             username: true,
+//             avatar_url: true,
+//             rating: true,
+//             rating_count: true,
+//           },
+//         },
+//       },
+//       take: limit,
+//       skip: offset,
+//       orderBy,
+//     })
+
+//     return NextResponse.json({ listings, hasMore: listings.length === limit })
+//   } catch (error) {
+//     console.error("[listings GET] error:", error)
+//     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+//   }
+// }
+
+// // ------------------- POST (create listing) -------------------
+// export async function POST(request: NextRequest) {
+//   try {
+//     const authUser = await getUserFromRequest(request)
+
+//     if (!authUser?.email && !authUser?.user_id) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//     }
+
+//     // ✅ Ensure user exists
+//     let dbUser = null
+//     if (authUser?.email) {
+//       dbUser = await prisma.user.findUnique({
+//         where: { email: authUser.email },
+//         select: { user_id: true },
+//       })
+
+//       if (!dbUser) {
+//         dbUser = await prisma.user.create({
+//           data: {
+//             email: authUser.email,
+//             username: authUser.name || authUser.email.split("@")[0],
+//             password_hash: "google-oauth",
+//             user_type: "both",
+//           },
+//           select: { user_id: true },
+//         })
+//       }
+//     }
+
+//     const userId = dbUser?.user_id || Number(authUser.user_id)
+//     if (!userId || isNaN(userId)) {
+//       return NextResponse.json({ error: "User not found or invalid" }, { status: 404 })
+//     }
+
+//     // ✅ SAFE SETTINGS FETCH (NO CRASH)
+//     const settings = await prisma.appSettings.findFirst()
+//     const fee_usd = settings?.listing_fee_usd || 0.99
+//     const expiry_days = settings?.listing_expiry_days || 30
+
+//     const expiresAt = new Date()
+//     expiresAt.setDate(expiresAt.getDate() + expiry_days)
+
+//     const body = await request.json()
+//     const {
+//       type,
+//       title,
+//       description,
+//       category,
+//       barter_request,
+//       photos = [],
+//       condition,
+//       availability,
+//       latitude,
+//       longitude,
+//       location_text,
+//     } = body || {}
+
+//     if (!type || !title || !description || !category) {
+//       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+//     }
+
+//     const listing = await prisma.listing.create({
+//       data: {
+//         user_id: userId,
+//         type,
+//         title: String(title).trim(),
+//         description: String(description).trim(),
+//         category: String(category).trim(),
+//         barter_request: barter_request ?? null,
+//         photos: Array.isArray(photos) ? photos : [],
+//         condition: condition ?? null,
+//         availability: availability ?? null,
+//         latitude: latitude ? Number(latitude) : null,
+//         longitude: longitude ? Number(longitude) : null,
+//         location_text: location_text ?? null,
+//         is_active: true,
+//         listing_fee_usd: fee_usd,
+//         expires_at: expiresAt,
+//       },
+//     })
+
+//     // ✅ SAFE POSTGIS UPDATE (NO MORE 42883 ERRORS)
+//     if (
+//       latitude !== null &&
+//       latitude !== undefined &&
+//       longitude !== null &&
+//       longitude !== undefined
+//     ) {
+//       try {
+//         await prisma.$executeRawUnsafe(`
+//           UPDATE "Listing"
+//           SET location = ST_SetSRID(
+//             ST_MakePoint(
+//               ${Number(longitude)}::double precision,
+//               ${Number(latitude)}::double precision
+//             ),
+//             4326
+//           )
+//           WHERE item_id = ${listing.item_id};
+//         `)
+//       } catch (err) {
+//         console.warn("⚠️ PostGIS update skipped:", err)
+//       }
+//     }
+
+//     return NextResponse.json({ listing }, { status: 201 })
+//   } catch (error) {
+//     console.error("[listings POST] error:", error)
+//     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+//   }
+// }
+
+// // ------------------- OPTIONS -------------------
+// export async function OPTIONS() {
+//   return new Response(null, {
+//     status: 204,
+//     headers: {
+//       "Access-Control-Allow-Origin": "*",
+//       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+//       "Access-Control-Allow-Headers": "Content-Type, Authorization",
+//     },
+//   })
+// }

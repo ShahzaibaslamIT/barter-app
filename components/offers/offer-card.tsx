@@ -1082,7 +1082,7 @@ export function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
   const otherUser =
     type === "sent"
-      ? `Owner #${offer.listing?.user_id ?? "?"}`
+      ? `${ offer.offerer?.username ?? "?"}`
       : offer.offerer?.username
   const otherUserAvatar =
     type === "sent" ? undefined : offer.offerer?.avatar_url

@@ -847,10 +847,10 @@ export default function HomePage() {
                     onDeleted={handleDeleted}
                   />
                   <div className="flex justify-between items-center mt-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
+                    {/* <div className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4 text-green-600" />
                       <span>${listing.listing_fee_usd?.toFixed(2) ?? "0.99"}</span>
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4 text-yellow-600" />
                       <span>{formatExpiry(listing.expires_at)}</span>

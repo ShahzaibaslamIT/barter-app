@@ -68,7 +68,7 @@ export default function LocationPrompt({ onSuccess }: { onSuccess: () => void })
       setStatus("idle");
       onSuccess();
     } catch (err) {
-      console.error("❌ LocationPrompt error:", err);
+      // console.error("❌ LocationPrompt error:", err);
       setStatus("error");
     }
   };
