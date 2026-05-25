@@ -8,58 +8,89 @@ datasource db {
 }
 
 model User {
-  email           String          @unique
-  created_at      DateTime        @default(now())
-  password_hash   String?
-  user_id         Int             @id @default(autoincrement())
-  username        String
-  location_text   String?
-  phone           String?
-  user_type       UserType        @default(both)
-  avatar_url      String?
-  rating          Float?
-  rating_count    Int?
-  otp_code        String?
-  otp_expires     DateTime?
-  email_verified  Boolean         @default(false)
-  offersMade      BarterOffer[]   @relation("OffersMade")
-  listings        Listing[]       @relation("UserListings")
-  messages        Message[]
-  lastSentThreads MessageThread[] @relation("LastSenderRelation")
-  threadsAsUser1  MessageThread[] @relation("User1Threads")
-  threadsAsUser2  MessageThread[] @relation("User2Threads")
-  ratingsReceived Rating[]        @relation("RatedRelation")
-  ratingsGiven    Rating[]        @relation("RaterRelation")
+  email             String          @unique
+  created_at        DateTime        @default(now())
+  password_hash     String?
+  user_id           Int             @id @default(autoincrement())
+  username          String
+  location_text     String?
+  phone             String?
+  country           String?
+  state_province    String?
+  city              String?
+  postal_code       String?
+  address_line1     String?
+  address_line2     String?
+  latitude          Float?
+  longitude         Float?
+  profile_complete  Boolean?        @default(false)
+  user_type         UserType        @default(both)
+  avatar_url        String?
+  rating            Float?
+  rating_count      Int?
+  otp_code          String?
+  otp_expires       DateTime?
+  email_verified    Boolean         @default(false)
+  // Terms & Conditions
+  terms_accepted    Boolean         @default(false)
+  terms_accepted_at DateTime?
+  // Admin moderation fields
+  status            UserStatus      @default(active)
+  admin_notes       String?
+  suspended_until   DateTime?
+  suspension_reason String?
+  warning_count     Int             @default(0)
+  blacklisted_until DateTime?
+  blacklist_reason  String?
+  offersMade        BarterOffer[]   @relation("OffersMade")
+  listings          Listing[]       @relation("UserListings")
+  messages          Message[]
+  lastSentThreads   MessageThread[] @relation("LastSenderRelation")
+  threadsAsUser1    MessageThread[] @relation("User1Threads")
+  threadsAsUser2    MessageThread[] @relation("User2Threads")
+  ratingsReceived   Rating[]        @relation("RatedRelation")
+  ratingsGiven      Rating[]        @relation("RaterRelation")
+  pushSubscriptions PushSubscription[]
+  reports_made      Report[]        @relation("ReportsMade")
 }
 
 model Listing {
-  item_id         Int             @id @default(autoincrement())
-  user_id         Int
-  title           String
-  description     String
-  category        String
-  condition       String?
-  latitude        Float?
-  longitude       Float?
-  is_active       Boolean         @default(true)
-  created_at      DateTime        @default(now())
-  availability    Json?
-  barter_request  String?
-  photos          String[]
-  type            ListingType
-  location_text   String?
-  expires_at      DateTime?       @db.Timestamp(6)
-  listing_fee_usd Decimal?        @db.Decimal(10, 2)
-  location        Bytes?
-  offers          BarterOffer[]   @relation("ListingOffers")
-  offeredAs       BarterOffer[]   @relation("OfferedListingRelation")
-  user            User            @relation("UserListings", fields: [user_id], references: [user_id], onDelete: Cascade)
-  threads         MessageThread[] @relation("ListingThreads")
-  
+  item_id           Int                       @id @default(autoincrement())
+  user_id           Int
+  title             String
+  description       String
+  category          String
+  condition         String?
+  latitude          Float?
+  longitude         Float?
+  is_active         Boolean                   @default(true)
+  created_at        DateTime                  @default(now())
+  availability      Json?
+  barter_request    String?
+  photos            String[]
+  type              ListingType
+  location_text     String?
+  city_name         String?
+  expires_at        DateTime?                 @db.Timestamp(6)
+  listing_fee_usd   Decimal?                  @db.Decimal(10, 2)
+  location          Unsupported("geography")?
+  // Admin moderation fields
+  moderation_status ModerationStatus          @default(approved)
+  moderation_reason String?
+  moderated_by_id   Int?
+  moderated_at      DateTime?
+  offers            BarterOffer[]             @relation("ListingOffers")
+  offeredAs         BarterOffer[]             @relation("OfferedListingRelation")
+  user              User                      @relation("UserListings", fields: [user_id], references: [user_id], onDelete: Cascade)
+  threads           MessageThread[]           @relation("ListingThreads")
+  moderated_by      AdminUser?                @relation("ModeratedListings", fields: [moderated_by_id], references: [id])
+
   @@index([user_id])
   @@index([category])
   @@index([created_at])
   @@index([expires_at])
+  @@index([moderation_status])
+  @@index([location], map: "listing_location_gist", type: Gist)
 }
 
 model BarterOffer {
@@ -138,6 +169,27 @@ model AppSettings {
   updated_at          DateTime @updatedAt
 }
 
+model PushSubscription {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @unique
+  device     String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user       User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
 enum UserType {
   service_provider
   item_owner
@@ -156,4 +208,107 @@ enum OfferStatus {
   withdrawn
   completed
   cancelled
+}
+
+// ─── Admin enums ────────────────────────────────────────────
+
+enum AdminRole {
+  super_admin
+  moderator
+  support
+}
+
+enum UserStatus {
+  active
+  suspended
+  warned
+  blacklisted
+  banned
+}
+
+enum ModerationStatus {
+  pending
+  approved
+  rejected
+  removed
+  needs_update
+  spam_flagged
+  blacklisted
+}
+
+enum ReportType {
+  listing
+  user
+  message
+  rating
+}
+
+enum ReportStatus {
+  open
+  in_review
+  resolved
+  closed
+}
+
+enum ReportOutcome {
+  no_action
+  listing_removed
+  user_warned
+  user_suspended
+  user_banned
+}
+
+// ─── Admin models ────────────────────────────────────────────
+
+model AdminUser {
+  id                 Int        @id @default(autoincrement())
+  email              String     @unique
+  password_hash      String
+  name               String
+  role               AdminRole  @default(moderator)
+  is_active          Boolean    @default(true)
+  failed_login_count Int        @default(0)
+  locked_until       DateTime?
+  last_login_at      DateTime?
+  created_at         DateTime   @default(now())
+  auditLogs          AuditLog[]
+  resolvedReports    Report[]   @relation("ResolvedByAdmin")
+  moderatedListings  Listing[]  @relation("ModeratedListings")
+}
+
+model AuditLog {
+  id          Int       @id @default(autoincrement())
+  admin_id    Int
+  action_type String
+  entity_type String
+  entity_id   Int
+  metadata    Json?
+  notes       String?
+  created_at  DateTime  @default(now())
+  admin       AdminUser @relation(fields: [admin_id], references: [id])
+
+  @@index([admin_id])
+  @@index([entity_type, entity_id])
+  @@index([created_at])
+}
+
+model Report {
+  id                 Int            @id @default(autoincrement())
+  reporter_id        Int
+  reported_type      ReportType
+  reported_entity_id Int
+  reason             String
+  notes              String?
+  status             ReportStatus   @default(open)
+  outcome            ReportOutcome?
+  resolved_by_id     Int?
+  resolved_at        DateTime?
+  created_at         DateTime       @default(now())
+  reporter           User           @relation("ReportsMade", fields: [reporter_id], references: [user_id])
+  resolved_by        AdminUser?     @relation("ResolvedByAdmin", fields: [resolved_by_id], references: [id])
+
+  @@index([reporter_id])
+  @@index([reported_type, reported_entity_id])
+  @@index([status])
+  @@index([created_at])
 }
