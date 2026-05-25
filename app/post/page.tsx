@@ -91,8 +91,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Package, Wrench, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTermsGate } from "@/hooks/use-terms-gate"
 
 export default function PostPage() {
+  useTermsGate()
   const [selectedType, setSelectedType] = useState<"item" | "service" | null>(null)
   const router = useRouter()
 
@@ -115,7 +117,7 @@ export default function PostPage() {
           <ListingForm
             type={selectedType}
             onSuccess={() => {
-              router.push("/home") // ✅ Redirect to home after successful post
+              router.push("/my-listings") // ✅ Redirect to home after successful post
             }}
           />
         </div>

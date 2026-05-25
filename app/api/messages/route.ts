@@ -85,6 +85,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest, getAuthSession } from "@/lib/auth";
+import { sendPushNotification } from "@/lib/send-notification";
+import { enforceUserStatus } from "@/lib/user-status";
 
 async function getAuthUser(request: NextRequest) {
   const jwtUser = await getUserFromRequest(request);
@@ -117,6 +119,10 @@ export async function POST(request: NextRequest) {
         headers: { "Cache-Control": "no-store" },
       });
     }
+
+    // Check if user is suspended/banned/blacklisted
+    const statusBlock = await enforceUserStatus(Number(user.user_id));
+    if (statusBlock) return statusBlock;
 
     const { thread_id, content } = await request.json();
     if (!thread_id || !content?.trim()) {
@@ -184,6 +190,29 @@ export async function POST(request: NextRequest) {
 
       return message;
     });
+
+    // 🔔 Notify the OTHER participant in the thread
+    const recipientId =
+      thread.user1_id === Number(user.user_id)
+        ? thread.user2_id
+        : thread.user1_id;
+
+    const senderName = result.sender?.username ?? "Someone";
+    const preview =
+      result.content.length > 60
+        ? result.content.slice(0, 60) + "…"
+        : result.content;
+
+    sendPushNotification({
+      userId: recipientId,
+      title: `${senderName} sent you a message 💬`,
+      body: preview,
+      url: `/messages`,
+      data: {
+        type: "new_message",
+        thread_id: String(thread.thread_id),
+      },
+    }).catch((err: unknown) => console.error("[Notify] Message push failed:", err));
 
     return new NextResponse(JSON.stringify({ message: result }), {
       status: 201,

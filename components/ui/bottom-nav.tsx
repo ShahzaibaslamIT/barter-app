@@ -11,9 +11,11 @@ export function BottomNav() {
   const navItems = [
     { icon: Home, label: "Home", path: "/home" },
     { icon: Search, label: "Discover", path: "/discover" },
+    { icon: Search, label: "My Listings", path: "/my-listings" },
     { icon: Plus, label: "Post", path: "/post" },
     { icon: Handshake, label: "Offers", path: "/offers" },
     { icon: User, label: "Profile", path: "/profile" },
+
   ]
 
   return (

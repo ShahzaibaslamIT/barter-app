@@ -309,6 +309,8 @@ export const runtime = "nodejs"
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUserFromRequest } from "@/lib/auth"
+import { getServerUser } from "@/lib/get-server-user"
+import { enforceUserStatus } from "@/lib/user-status"
 
 
 
@@ -318,18 +320,47 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category") || undefined
     const type = searchParams.get("type") || undefined
+    const city = searchParams.get("city") || ""
     const limit = Math.min(Number(searchParams.get("limit") || 20), 100)
     const offset = Math.max(Number(searchParams.get("offset") || 0), 0)
+    const searchQuery = searchParams.get("q") || ""
 
     const sort = (searchParams.get("sort") || "recent").toLowerCase()
     const orderBy =
       sort === "oldest" ? { created_at: "asc" as const } : { created_at: "desc" as const }
 
+    // Build base where clause
     const where: any = { is_active: true }
     if (category) where.category = category
     if (type) where.type = type
 
-    // ✅ Only fetch scalar fields — not geometry
+    // Use AND array so search + city can both be active simultaneously
+    const andClauses: any[] = []
+
+    if (searchQuery.trim()) {
+      andClauses.push({
+        OR: [
+          { title: { contains: searchQuery.trim(), mode: 'insensitive' } },
+          { description: { contains: searchQuery.trim(), mode: 'insensitive' } },
+        ],
+      })
+    }
+
+    // City filter — match city_name (new listings) or fall back to location_text (old listings)
+    if (city.trim()) {
+      andClauses.push({
+        OR: [
+          { city_name: { contains: city.trim(), mode: 'insensitive' } },
+          { AND: [{ city_name: null }, { location_text: { contains: city.trim(), mode: 'insensitive' } }] },
+        ],
+      })
+    }
+
+    if (andClauses.length > 0) where.AND = andClauses
+
+    console.log("🔍 [listings GET] Query params:", { category, type, searchQuery: searchQuery.trim() })
+
+    // ✅ Fetch listings with search support
     const listings = await prisma.listing.findMany({
       where,
       select: {
@@ -362,6 +393,8 @@ export async function GET(request: NextRequest) {
       orderBy,
     })
 
+    console.log(`✅ [listings GET] Found ${listings.length} listings`)
+
     return NextResponse.json({ listings, hasMore: listings.length === limit })
   } catch (error) {
     console.error("[listings GET] error:", error)
@@ -372,7 +405,7 @@ export async function GET(request: NextRequest) {
 // ------------------- POST (create listing) -------------------
 export async function POST(request: NextRequest) {
   try {
-    const authUser = await getUserFromRequest(request)
+    const authUser = await getServerUser();
     console.log("🔑 Auth user from request:", authUser)
 
     if (!authUser?.email && !authUser?.user_id) {
@@ -405,6 +438,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found or invalid" }, { status: 404 })
     }
 
+    // ✅ Check if user is suspended/banned/blacklisted
+    const statusBlock = await enforceUserStatus(userId);
+    if (statusBlock) return statusBlock;
+
+    // ✅ Check if user has location data (required for listings)
+    const userProfile = await prisma.user.findUnique({
+      where: { user_id: userId },
+      select: {
+        latitude: true,
+        longitude: true,
+        location_text: true,
+      },
+    })
+
+    // Only require location data - if user completed profile once, they have this
+    if (!userProfile?.latitude || !userProfile.longitude) {
+      return NextResponse.json(
+        {
+          error: "Location required. Please complete your profile to set your location.",
+          redirect: "/complete-profile"
+        },
+        { status: 403 }
+      )
+    }
+
     // ✅ Fetch listing settings
     const settings = await prisma.appSettings.findUnique({ where: { id: 1 } })
     const fee_usd = settings?.listing_fee_usd || 0.99
@@ -425,6 +483,7 @@ export async function POST(request: NextRequest) {
       latitude,
       longitude,
       location_text,
+      city_name,
     } = body || {}
 
     if (!type || !title || !description || !category) {
@@ -446,6 +505,7 @@ export async function POST(request: NextRequest) {
         latitude: latitude ? Number(latitude) : null,
         longitude: longitude ? Number(longitude) : null,
         location_text: location_text ?? null,
+        city_name: city_name ? String(city_name).trim() : null,
         is_active: true,
         listing_fee_usd: fee_usd,
         expires_at: expiresAt,
@@ -462,19 +522,27 @@ export async function POST(request: NextRequest) {
     })
 
     // ✅ Update PostGIS geometry using SQL directly
-  prisma.$executeRawUnsafe(`
-  UPDATE "Listing"
-  SET location = ST_SetSRID(
-    ST_MakePoint(
-      ${Number(longitude)}::double precision,
-      ${Number(latitude)}::double precision
-    ),
-    4326
-  )
-  WHERE item_id = ${listing.item_id};
-`)
 
+    if (
+  typeof latitude === "number" &&
+  typeof longitude === "number" &&
+  !isNaN(latitude) &&
+  !isNaN(longitude)
+) {
+  await prisma.$executeRawUnsafe(`
+    UPDATE "Listing"
+    SET location = ST_SetSRID(
+      ST_MakePoint(
+        ${longitude}::double precision,
+        ${latitude}::double precision
+      ),
+      4326
+    )
+    WHERE item_id = ${listing.item_id};
+  `)
+}
 
+ 
     // ✅ Return enriched listing with user info
     const updated = await prisma.listing.findUnique({
       where: { item_id: listing.item_id },

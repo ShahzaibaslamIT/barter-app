@@ -222,6 +222,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUserFromRequest, getAuthSession } from "@/lib/auth"
+import { sendPushNotification } from "@/lib/send-notification"
 
 // 🔑 Unified auth resolver
 async function getAuthUser(request: NextRequest) {
@@ -273,7 +274,10 @@ export async function PUT(
 
     const offer = await prisma.barterOffer.findUnique({
       where: { offer_id: offerId },
-      include: { listing: { select: { user_id: true } } },
+      include: {
+        listing: { select: { user_id: true, title: true } },
+        offerer: { select: { user_id: true, username: true } },
+      },
     })
 
     if (!offer) {
@@ -335,6 +339,23 @@ export async function PUT(
       where: { offer_id: offerId },
       data: { status },
     })
+
+    // 🔔 Notify offerer when listing owner accepts or declines their offer
+    if (status === "accepted" || status === "declined") {
+      sendPushNotification({
+        userId: offer.offerer_id,
+        title: status === "accepted" ? "Offer Accepted! 🎉" : "Offer Update",
+        body:
+          status === "accepted"
+            ? `Your offer for "${offer.listing.title}" was accepted!`
+            : `Your offer for "${offer.listing.title}" was declined.`,
+        url: `/offers`,
+        data: {
+          type: status === "accepted" ? "offer_accepted" : "offer_declined",
+          offer_id: String(offerId),
+        },
+      }).catch((err: unknown) => console.error("[Notify] Failed:", err))
+    }
 
     return NextResponse.json({ offer: updatedOffer })
   } catch (error) {

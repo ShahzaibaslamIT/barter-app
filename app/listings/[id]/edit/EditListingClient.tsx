@@ -55,6 +55,7 @@ export default function EditListingClient({
 
       const res = await fetch(`/api/listings/${listing.item_id}`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

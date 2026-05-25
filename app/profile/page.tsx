@@ -1,892 +1,1041 @@
-// "use client"
+// "use client";
 
-// import { useEffect, useState } from "react"
-// import { useRouter } from "next/navigation"
-// import { useSession, signOut } from "next-auth/react"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Badge } from "@/components/ui/badge"
-// import { UserReviews } from "@/components/ratings/user-reviews"
-// import { RatingDisplay } from "@/components/ratings/rating-display"
-// import { LogOut, Edit3, Upload } from "lucide-react"
-// import { Plus, Search, MapPin, TrendingUp, Loader2 } from "lucide-react"
+// import { useEffect, useState } from "react";
+// import { useRouter } from "next/navigation";
+// import { useSession, signOut } from "next-auth/react";
+
+// import { BottomNav } from "@/components/ui/bottom-nav";
+// import { Button } from "@/components/ui/button";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Badge } from "@/components/ui/badge";
+// import { UserReviews } from "@/components/ratings/user-reviews";
+// import { RatingDisplay } from "@/components/ratings/rating-display";
+// import {
+//   LogOut,
+//   Edit,
+//   Plus,
+//   Loader2,
+//   Mail,
+//   MapPin,
+//   Calendar,
+//   Camera,
+//   Save,
+//   TrendingUp,
+//   Package,
+//   Star,
+//   CheckCircle,
+// } from "lucide-react";
+
 // import {
 //   Dialog,
 //   DialogContent,
 //   DialogHeader,
 //   DialogTitle,
-// } from "@/components/ui/dialog"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Textarea } from "@/components/ui/textarea"
-// import { useToast } from "@/hooks/use-toast"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-// export default function ProfilePage() {
-//   const { data: session, status } = useSession()
-//   const [user, setUser] = useState<any>(null)
-//   const [userStats, setUserStats] = useState({
-//     averageRating: 0,
-//     totalRatings: 0,
-//     activeListings: 0,
-//     completedTrades: 0,
-//   })
-//   const [isDialogOpen, setIsDialogOpen] = useState(false)
-//   const [editData, setEditData] = useState({
-//     username: "",
-//     email: "",
-//     phone: "",
-//     bio: "",
-//     avatarFile: null as File | null,
-//     avatarPreview: "",
-//   })
-//   const router = useRouter()
-//   const { toast } = useToast()
-
-//   useEffect(() => {
-//     if (status === "loading") return
-
-//     const stored = localStorage.getItem("user")
-//     const localUser = stored ? JSON.parse(stored) : null
-//     const effectiveUser = session?.user || localUser
-
-//     if (!effectiveUser) {
-//       router.push("/auth")
-//       return
-//     }
-
-//     setUser(effectiveUser)
-//     setEditData((prev) => ({
-//       ...prev,
-//       username: effectiveUser.username || effectiveUser.name || "",
-//       email: effectiveUser.email || "",
-//       phone: effectiveUser.phone || "",
-//       bio: effectiveUser.bio || "",
-//       avatarPreview: effectiveUser.avatar_url || effectiveUser.image || "",
-//     }))
-
-//     if (effectiveUser.id || effectiveUser.user_id) {
-//       fetchUserStats(effectiveUser.id || effectiveUser.user_id)
-//     }
-//   }, [status, session, router])
-
-//   const fetchUserStats = async (userId: string) => {
-//     try {
-//       const response = await fetch(`/api/ratings?user_id=${userId}`)
-//       const data = await response.json()
-//       if (response.ok) {
-//         setUserStats({
-//           averageRating: data.average_rating ?? 0,
-//           totalRatings: data.total_ratings ?? 0,
-//           activeListings: data.active_listings ?? 0,
-//           completedTrades: data.completed_trades ?? 0,
-//         })
-//       }
-//     } catch (error) {
-//       console.error("Failed to fetch user stats:", error)
-//     }
-//   }
-
-//   const handleLogout = () => {
-//     localStorage.removeItem("auth_token")
-//     localStorage.removeItem("user")
-//     signOut({ callbackUrl: "/auth" })
-//   }
-
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0] || null
-//     if (file) {
-//       setEditData((prev) => ({
-//         ...prev,
-//         avatarFile: file,
-//         avatarPreview: URL.createObjectURL(file),
-//       }))
-//     }
-//   }
-
-//   const handleSaveProfile = () => {
-//     const updatedUser = { ...user, ...editData, avatar_url: editData.avatarPreview }
-//     localStorage.setItem("user", JSON.stringify(updatedUser))
-//     setUser(updatedUser)
-//     setIsDialogOpen(false)
-
-//     toast({
-//       title: "Profile Updated",
-//       description: "Your profile information has been updated successfully.",
-//     })
-//   }
-
-//   if (status === "loading" && !user) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-//         Loading profile...
-//       </div>
-//     )
-//   }
-
-//   if (!user) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-//         No user found
-//       </div>
-//     )
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-background pb-20">
-//       <div className="container mx-auto px-4 pt-10 space-y-8">
-//         {/* Profile Header */}
-//         <Card className="p-6 text-center shadow-md">
-//           <div className="flex flex-col items-center space-y-3">
-//             <div className="relative">
-//               <Avatar className="h-28 w-28 ring-4 ring-muted">
-//                 <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
-//                 <AvatarFallback className="text-3xl">
-//                   {user.username?.charAt(0) || "U"}
-//                 </AvatarFallback>
-//               </Avatar>
-//               <Button
-//                 size="icon"
-//                 variant="secondary"
-//                 className="absolute bottom-2 right-2 rounded-full shadow-md"
-//                 onClick={() => setIsDialogOpen(true)}
-//               >
-//                 <Edit3 className="h-4 w-4" />
-//               </Button>
-//             </div>
-//             <div>
-//               <h2 className="text-2xl font-bold">{user.username}</h2>
-//               <p className="text-muted-foreground">{user.email}</p>
-//             </div>
-//             {user.bio && <p className="text-sm text-muted-foreground">{user.bio}</p>}
-//             <div className="flex justify-center gap-2 mt-2">
-//               <Badge variant="outline" className="capitalize">
-//                 {user.user_type?.replace("_", " ") || "user"}
-//               </Badge>
-//               <RatingDisplay rating={userStats.averageRating} count={userStats.totalRatings} size="sm" />
-//             </div>
-//           </div>
-//         </Card>
-
-//         {/* Stats */}
-//         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-//           {[
-//             { label: "Active Listings", value: userStats.activeListings },
-//             { label: "Completed Trades", value: userStats.completedTrades },
-//             { label: "Reviews", value: userStats.totalRatings },
-//             { label: "Rating", value: userStats.averageRating.toFixed(1) },
-//           ].map((stat, idx) => (
-//             <Card key={idx} className="shadow-sm hover:shadow-md transition">
-//               <CardContent className="p-4 text-center">
-//                 <p className="text-xl font-semibold">{stat.value}</p>
-//                 <p className="text-sm text-muted-foreground">{stat.label}</p>
-//               </CardContent>
-//             </Card>
-//           ))}
-//         </div>
-
-//         {/* Actions */}
-//         <Card className="shadow-sm">
-//           <CardHeader>
-//             <CardTitle>Quick Actions</CardTitle>
-//           </CardHeader>
-//           <CardContent className="grid gap-3">
-//             <Button onClick={() => router.push("/post")}>
-//                             <Plus className="h-4 w-4 mr-2" />
-//                             Create First Listing
-//                           </Button>
-//             <Button variant="outline" className="w-full" onClick={() => router.push("/offers")}>
-//               My Offers
-//             </Button>
-//           </CardContent>
-//         </Card>
-
-//         {/* Reviews */}
-//         <UserReviews userId={user.id || user.user_id} />
-
-//         {/* Logout */}
-//         <Button variant="destructive" className="w-full" onClick={handleLogout}>
-//           <LogOut className="h-4 w-4 mr-2" />
-//           Logout
-//         </Button>
-//       </div>
-
-//       <BottomNav />
-
-//       {/* Edit Profile Dialog */}
-//       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-//         <DialogContent className="max-w-lg">
-//           <DialogHeader>
-//             <DialogTitle>Edit Profile</DialogTitle>
-//           </DialogHeader>
-//           <div className="space-y-4">
-//             <div className="grid grid-cols-2 gap-4">
-//               <div>
-//                 <Label htmlFor="username">Username</Label>
-//                 <Input
-//                   id="username"
-//                   value={editData.username}
-//                   onChange={(e) => setEditData({ ...editData, username: e.target.value })}
-//                 />
-//               </div>
-//               <div>
-//                 <Label htmlFor="email">Email</Label>
-//                 <Input
-//                   id="email"
-//                   type="email"
-//                   value={editData.email}
-//                   onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-//                 />
-//               </div>
-//               <div className="col-span-2">
-//                 <Label htmlFor="bio">Bio</Label>
-//                 <Textarea
-//                   id="bio"
-//                   rows={3}
-//                   value={editData.bio}
-//                   onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-//                 />
-//               </div>
-//             </div>
-//             <div className="flex gap-3 mt-6">
-//               <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-//                 Cancel
-//               </Button>
-//               <Button className="flex-1" onClick={handleSaveProfile}>
-//                 Save Changes
-//               </Button>
-//             </div>
-//           </div>
-//         </DialogContent>
-//       </Dialog>
-//     </div>
-//   )
-// }
-
-
-// "use client"
-
-// import { useEffect, useState } from "react"
-// import { useRouter } from "next/navigation"
-// import { useSession, signOut } from "next-auth/react"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Badge } from "@/components/ui/badge"
-// import { UserReviews } from "@/components/ratings/user-reviews"
-// import { RatingDisplay } from "@/components/ratings/rating-display"
-// import { LogOut, Edit3, Upload, Plus } from "lucide-react"
+// } from "@/components/ui/dialog";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Textarea } from "@/components/ui/textarea";
+// import { useToast } from "@/hooks/use-toast";
 // import {
-//   Dialog,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Textarea } from "@/components/ui/textarea"
-// import { useToast } from "@/hooks/use-toast"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card";
 
 // export default function ProfilePage() {
-//   const { data: session, status } = useSession()
-//   const [user, setUser] = useState<any>(null)
+//   const router = useRouter();
+//   const { data: session } = useSession();
+//   const { toast } = useToast();
+
+//   const [user, setUser] = useState<any>(null);
+//   const [loadingStats, setLoadingStats] = useState(false);
+//   const [isDialogOpen, setIsDialogOpen] = useState(false);
+//   const [uploadingImage, setUploadingImage] = useState(false);
+
 //   const [userStats, setUserStats] = useState({
 //     averageRating: 0,
 //     totalRatings: 0,
 //     activeListings: 0,
 //     completedTrades: 0,
-//   })
-//   const [isDialogOpen, setIsDialogOpen] = useState(false)
+//   });
+
 //   const [editData, setEditData] = useState({
 //     username: "",
 //     email: "",
-//     phone: "",
 //     bio: "",
-//     avatarFile: null as File | null,
-//     avatarPreview: "",
-//   })
-//   const router = useRouter()
-//   const { toast } = useToast()
+//     avatar_url: "",
+//   });
 
-//   // 🔥 Sync NextAuth session with localStorage (for Google users)
+//   // Auth Resolution
 //   useEffect(() => {
-//     if (session?.auth_token) {
-//       localStorage.setItem("auth_token", session.auth_token)
-//       localStorage.setItem("user", JSON.stringify(session.user))
-//     }
-//   }, [session])
+//     let resolvedUser: any = null;
 
-//   // Load user data from either NextAuth or localStorage
-//   useEffect(() => {
-//     if (status === "loading") return
+//     if (session?.user) {
+//       resolvedUser = session.user;
+//       localStorage.setItem("user", JSON.stringify(session.user));
 
-//     const stored = localStorage.getItem("user")
-//     const localUser = stored ? JSON.parse(stored) : null
-//     const effectiveUser = session?.user || localUser
-
-//     if (!effectiveUser) {
-//       router.push("/auth")
-//       return
+//       const token = (session as any)?.auth_token;
+//       if (token) {
+//         localStorage.setItem("auth_token", token);
+//       }
 //     }
 
-//     setUser(effectiveUser)
-//     setEditData((prev) => ({
-//       ...prev,
-//       username: effectiveUser.username || effectiveUser.name || "",
-//       email: effectiveUser.email || "",
-//       phone: effectiveUser.phone || "",
-//       bio: effectiveUser.bio || "",
-//       avatarPreview: effectiveUser.avatar_url || effectiveUser.image || "",
-//     }))
-
-//     if (effectiveUser.id || effectiveUser.user_id) {
-//       fetchUserStats(effectiveUser.id || effectiveUser.user_id)
+//     if (!resolvedUser) {
+//       const stored = localStorage.getItem("user");
+//       if (stored && stored !== "undefined") {
+//         try {
+//           resolvedUser = JSON.parse(stored);
+//         } catch {
+//           localStorage.removeItem("user");
+//           localStorage.removeItem("auth_token");
+//         }
+//       }
 //     }
-//   }, [status, session, router])
 
-//   const fetchUserStats = async (userId: string) => {
+//     if (!resolvedUser || !(resolvedUser.user_id || resolvedUser.id)) {
+//       router.replace("/auth");
+//       return;
+//     }
+
+//     setUser(resolvedUser);
+
+//     setEditData({
+//       username: resolvedUser.username || resolvedUser.name || "",
+//       email: resolvedUser.email || "",
+//       bio: resolvedUser.bio || "",
+//       avatar_url: resolvedUser.avatar_url || resolvedUser.image || "",
+//     });
+
+//     fetchUserStats(resolvedUser);
+//   }, [session, router]);
+
+//   const fetchUserStats = async (u: any) => {
 //     try {
-//       const response = await fetch(`/api/ratings?user_id=${userId}`)
-//       const data = await response.json()
-//     if (response.ok) {
+//       setLoadingStats(true);
+//       const userId = Number(u.user_id || u.id);
+//       if (!userId) return;
+
+//       const res = await fetch(`/api/user/${userId}/stats`);
+//       const data = await res.json();
+
+//       if (res.ok) {
 //         setUserStats({
 //           averageRating: data.average_rating ?? 0,
 //           totalRatings: data.total_ratings ?? 0,
 //           activeListings: data.active_listings ?? 0,
 //           completedTrades: data.completed_trades ?? 0,
-//         })
+//         });
 //       }
-//     } catch (error) {
-//       console.error("Failed to fetch user stats:", error)
+//     } catch (err) {
+//       console.error("Stats fetch failed", err);
+//     } finally {
+//       setLoadingStats(false);
 //     }
-//   }
+//   };
 
-//   const handleLogout = () => {
-//     localStorage.removeItem("auth_token")
-//     localStorage.removeItem("user")
-//     signOut({ callbackUrl: "/auth" })
-//   }
+//   // ✅ FIXED: Image Upload
+//   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
 
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0] || null
-//     if (file) {
-//       setEditData((prev) => ({
-//         ...prev,
-//         avatarFile: file,
-//         avatarPreview: URL.createObjectURL(file),
-//       }))
+//     // Validate file type
+//     if (!file.type.startsWith('image/')) {
+//       toast({
+//         title: "Invalid file type",
+//         description: "Please select an image file",
+//         variant: "destructive",
+//       });
+//       return;
 //     }
-//   }
 
-//   const handleSaveProfile = () => {
-//     const updatedUser = { ...user, ...editData, avatar_url: editData.avatarPreview }
-//     localStorage.setItem("user", JSON.stringify(updatedUser))
-//     setUser(updatedUser)
-//     setIsDialogOpen(false)
+//     // Validate file size (max 5MB)
+//     if (file.size > 5 * 1024 * 1024) {
+//       toast({
+//         title: "File too large",
+//         description: "Image must be less than 5MB",
+//         variant: "destructive",
+//       });
+//       return;
+//     }
 
-//     toast({
-//       title: "Profile Updated",
-//       description: "Your profile information has been updated successfully.",
-//     })
-//   }
+//     setUploadingImage(true);
+    
+//     try {
+//       const formData = new FormData();
+//       formData.append("files", file);
 
-//   if (status === "loading" && !user) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-//         Loading profile...
-//       </div>
-//     )
-//   }
+//       const res = await fetch("/api/upload", {
+//         method: "POST",
+//         body: formData,
+//       });
+
+//       const data = await res.json();
+
+//       if (res.ok && data.urls && data.urls[0]) {
+//         setEditData(prev => ({ ...prev, avatar_url: data.urls[0] }));
+        
+//         toast({
+//           title: "Image uploaded",
+//           description: "Profile picture updated successfully",
+//         });
+//       } else {
+//         throw new Error(data.error || "Upload failed");
+//       }
+//     } catch (err) {
+//       console.error("Upload error:", err);
+//       toast({
+//         title: "Upload failed",
+//         description: err instanceof Error ? err.message : "Something went wrong",
+//         variant: "destructive",
+//       });
+//     } finally {
+//       setUploadingImage(false);
+//     }
+//   };
+
+//   const handleLogout = async () => {
+//     localStorage.removeItem("auth_token");
+//     localStorage.removeItem("user");
+//     await signOut({ callbackUrl: "/auth" });
+//   };
+
+//   const handleSaveProfile = async () => {
+//     try {
+//       const updated = {
+//         ...user,
+//         username: editData.username,
+//         bio: editData.bio,
+//         avatar_url: editData.avatar_url,
+//       };
+
+//       localStorage.setItem("user", JSON.stringify(updated));
+//       setUser(updated);
+//       setIsDialogOpen(false);
+
+//       toast({
+//         title: "Profile updated",
+//         description: "Your changes have been saved",
+//       });
+//     } catch (err) {
+//       toast({
+//         title: "Error",
+//         description: "Failed to update profile",
+//         variant: "destructive",
+//       });
+//     }
+//   };
 
 //   if (!user) {
 //     return (
-//       <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-//         No user found
+//       <div className="min-h-screen flex items-center justify-center">
+//         <Loader2 className="h-8 w-8 animate-spin text-primary" />
 //       </div>
-//     )
+//     );
 //   }
 
 //   return (
 //     <div className="min-h-screen bg-background pb-20">
-//       <div className="container mx-auto px-4 pt-10 space-y-8">
-//         {/* Profile Header */}
-//         <Card className="p-6 text-center shadow-md">
-//           <div className="flex flex-col items-center space-y-3">
-//             <div className="relative">
-//               <Avatar className="h-28 w-28 ring-4 ring-muted">
-//                 <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
-//                 <AvatarFallback className="text-3xl">
-//                   {user.username?.charAt(0) || "U"}
-//                 </AvatarFallback>
-//               </Avatar>
-//               <Button
-//                 size="icon"
-//                 variant="secondary"
-//                 className="absolute bottom-2 right-2 rounded-full shadow-md"
-//                 onClick={() => setIsDialogOpen(true)}
-//               >
-//                 <Edit3 className="h-4 w-4" />
-//               </Button>
-//             </div>
-//             <div>
-//               <h2 className="text-2xl font-bold">{user.username}</h2>
-//               <p className="text-muted-foreground">{user.email}</p>
-//             </div>
-//             {user.bio && <p className="text-sm text-muted-foreground">{user.bio}</p>}
-//             <div className="flex justify-center gap-2 mt-2">
-//               <Badge variant="outline" className="capitalize">
-//                 {user.user_type?.replace("_", " ") || "user"}
-//               </Badge>
-//               <RatingDisplay rating={userStats.averageRating} count={userStats.totalRatings} size="sm" />
+//       {/* Header Section */}
+//       <div className="border-b bg-card">
+//         <div className="container mx-auto px-4 py-8 max-w-5xl">
+//           <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+//             {/* Avatar */}
+//             <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
+//               <AvatarImage src={user.avatar_url || user.image} />
+//               <AvatarFallback className="text-4xl font-semibold bg-gradient-to-br from-primary/20 to-primary/5">
+//                 {user.username?.charAt(0)?.toUpperCase() || "U"}
+//               </AvatarFallback>
+//             </Avatar>
+
+//             {/* User Info */}
+//             <div className="flex-1 space-y-3">
+//               <div className="flex items-start justify-between">
+//                 <div>
+//                   <h1 className="text-3xl font-bold tracking-tight">
+//                     {user.username || user.name}
+//                   </h1>
+//                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+//                     <div className="flex items-center gap-1">
+//                       <Mail className="h-4 w-4" />
+//                       {user.email}
+//                     </div>
+//                     {user.location_text && (
+//                       <div className="flex items-center gap-1">
+//                         <MapPin className="h-4 w-4" />
+//                         {user.location_text}
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   onClick={() => setIsDialogOpen(true)}
+//                   className="gap-2"
+//                 >
+//                   <Edit className="h-4 w-4" />
+//                   Edit Profile
+//                 </Button>
+//               </div>
+
+//               {user.bio && (
+//                 <p className="text-muted-foreground max-w-2xl">
+//                   {user.bio}
+//                 </p>
+//               )}
+
+//               <div className="flex items-center gap-3">
+//                 <RatingDisplay
+//                   rating={userStats.averageRating}
+//                   count={userStats.totalRatings}
+//                   size="md"
+//                 />
+//                 <Badge variant="outline" className="gap-1">
+//                   <Calendar className="h-3 w-3" />
+//                   {user.created_at 
+//                     ? `Joined ${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+//                     : 'Member'}
+//                 </Badge>
+//               </div>
 //             </div>
 //           </div>
-//         </Card>
+//         </div>
+//       </div>
 
-//         {/* Stats */}
+//       {/* Content */}
+//       <div className="container mx-auto px-4 py-8 space-y-8 max-w-5xl">
+//         {/* Stats Grid */}
 //         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 //           {[
-//             { label: "Active Listings", value: userStats.activeListings },
-//             { label: "Completed Trades", value: userStats.completedTrades },
-//             { label: "Reviews", value: userStats.totalRatings },
-//             { label: "Rating", value: userStats.averageRating.toFixed(1) },
-//           ].map((stat, idx) => (
-//             <Card key={idx} className="shadow-sm hover:shadow-md transition">
-//               <CardContent className="p-4 text-center">
-//                 <p className="text-xl font-semibold">{stat.value}</p>
-//                 <p className="text-sm text-muted-foreground">{stat.label}</p>
-//               </CardContent>
-//             </Card>
-//           ))}
+//             {
+//               label: "Active Listings",
+//               value: userStats.activeListings,
+//               icon: Package,
+//               color: "text-blue-600",
+//             },
+//             {
+//               label: "Completed Trades",
+//               value: userStats.completedTrades,
+//               icon: CheckCircle,
+//               color: "text-green-600",
+//             },
+//             {
+//               label: "Total Reviews",
+//               value: userStats.totalRatings,
+//               icon: Star,
+//               color: "text-yellow-600",
+//             },
+//             {
+//               label: "Rating",
+//               value: userStats.averageRating.toFixed(1),
+//               icon: TrendingUp,
+//               color: "text-purple-600",
+//             },
+//           ].map((stat) => {
+//             const Icon = stat.icon;
+//             return (
+//               <Card key={stat.label}>
+//                 <CardContent className="p-6">
+//                   <div className="flex items-center justify-between mb-2">
+//                     <Icon className={`h-5 w-5 ${stat.color}`} />
+//                   </div>
+//                   <div className="space-y-1">
+//                     <p className="text-2xl font-bold">
+//                       {loadingStats ? (
+//                         <Loader2 className="h-5 w-5 animate-spin inline" />
+//                       ) : (
+//                         stat.value
+//                       )}
+//                     </p>
+//                     <p className="text-xs text-muted-foreground font-medium">
+//                       {stat.label}
+//                     </p>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             );
+//           })}
 //         </div>
 
-//         {/* Actions */}
-//         <Card className="shadow-sm">
+//         {/* Quick Actions */}
+//         <Card>
 //           <CardHeader>
 //             <CardTitle>Quick Actions</CardTitle>
 //           </CardHeader>
-//           <CardContent className="grid gap-3">
-//             <Button onClick={() => router.push("/post")}>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Create First Listing
+//           <CardContent className="flex gap-3">
+//             <Button onClick={() => router.push("/post")} className="gap-2">
+//               <Plus className="h-4 w-4" />
+//               Create Listing
 //             </Button>
-//             <Button variant="outline" className="w-full" onClick={() => router.push("/offers")}>
-//               My Offers
+//             <Button
+//               variant="outline"
+//               onClick={() => router.push("/home")}
+//               className="gap-2"
+//             >
+//               Browse Listings
 //             </Button>
 //           </CardContent>
 //         </Card>
 
 //         {/* Reviews */}
-//         <UserReviews userId={user.id || user.user_id} />
+//         <UserReviews userId={user.user_id || user.id} />
 
 //         {/* Logout */}
-//         <Button variant="destructive" className="w-full" onClick={handleLogout}>
-//           <LogOut className="h-4 w-4 mr-2" />
-//           Logout
+//         <Button
+//           variant="outline"
+//           className="w-full gap-2 text-destructive hover:text-destructive"
+//           onClick={handleLogout}
+//         >
+//           <LogOut className="h-4 w-4" />
+//           Sign Out
 //         </Button>
 //       </div>
 
 //       <BottomNav />
 
-//       {/* Edit Profile Dialog */}
+//       {/* Edit Dialog */}
 //       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-//         <DialogContent className="max-w-lg">
+//         <DialogContent className="max-w-md">
 //           <DialogHeader>
 //             <DialogTitle>Edit Profile</DialogTitle>
 //           </DialogHeader>
-//           <div className="space-y-4">
-//             <div className="grid grid-cols-2 gap-4">
-//               <div>
-//                 <Label htmlFor="username">Username</Label>
-//                 <Input
-//                   id="username"
-//                   value={editData.username}
-//                   onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+
+//           <div className="space-y-6 py-4">
+//             {/* Avatar Upload */}
+//             <div className="flex flex-col items-center gap-4">
+//               <Avatar className="h-24 w-24 border-2">
+//                 <AvatarImage src={editData.avatar_url} />
+//                 <AvatarFallback className="text-2xl">
+//                   {editData.username?.charAt(0)?.toUpperCase() || "U"}
+//                 </AvatarFallback>
+//               </Avatar>
+
+//               <Label
+//                 htmlFor="avatar-upload"
+//                 className="cursor-pointer"
+//               >
+//                 <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent transition-colors">
+//                   {uploadingImage ? (
+//                     <>
+//                       <Loader2 className="h-4 w-4 animate-spin" />
+//                       <span className="text-sm">Uploading...</span>
+//                     </>
+//                   ) : (
+//                     <>
+//                       <Camera className="h-4 w-4" />
+//                       <span className="text-sm">Change Photo</span>
+//                     </>
+//                   )}
+//                 </div>
+//                 <input
+//                   id="avatar-upload"
+//                   type="file"
+//                   accept="image/*"
+//                   onChange={handleImageUpload}
+//                   disabled={uploadingImage}
+//                   className="hidden"
 //                 />
-//               </div>
-//               <div>
-//                 <Label htmlFor="email">Email</Label>
-//                 <Input
-//                   id="email"
-//                   type="email"
-//                   value={editData.email}
-//                   onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-//                 />
-//               </div>
-//               <div className="col-span-2">
-//                 <Label htmlFor="bio">Bio</Label>
-//                 <Textarea
-//                   id="bio"
-//                   rows={3}
-//                   value={editData.bio}
-//                   onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-//                 />
-//               </div>
+//               </Label>
 //             </div>
-//             <div className="flex gap-3 mt-6">
-//               <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-//                 Cancel
-//               </Button>
-//               <Button className="flex-1" onClick={handleSaveProfile}>
-//                 Save Changes
-//               </Button>
+
+//             {/* Username */}
+//             <div className="space-y-2">
+//               <Label htmlFor="username">Username</Label>
+//               <Input
+//                 id="username"
+//                 value={editData.username}
+//                 onChange={(e) =>
+//                   setEditData({ ...editData, username: e.target.value })
+//                 }
+//                 placeholder="Your username"
+//               />
 //             </div>
+
+//             {/* Email (Read-only) */}
+//             <div className="space-y-2">
+//               <Label htmlFor="email">Email</Label>
+//               <Input
+//                 id="email"
+//                 value={editData.email}
+//                 disabled
+//                 className="bg-muted cursor-not-allowed"
+//               />
+//             </div>
+
+//             {/* Bio */}
+//             <div className="space-y-2">
+//               <Label htmlFor="bio">Bio</Label>
+//               <Textarea
+//                 id="bio"
+//                 value={editData.bio}
+//                 onChange={(e) =>
+//                   setEditData({ ...editData, bio: e.target.value })
+//                 }
+//                 placeholder="Tell us about yourself"
+//                 rows={4}
+//               />
+//             </div>
+//           </div>
+
+//           {/* Actions */}
+//           <div className="flex gap-3">
+//             <Button
+//               variant="outline"
+//               className="flex-1"
+//               onClick={() => setIsDialogOpen(false)}
+//             >
+//               Cancel
+//             </Button>
+//             <Button
+//               className="flex-1 gap-2"
+//               onClick={handleSaveProfile}
+//               disabled={uploadingImage}
+//             >
+//               <Save className="h-4 w-4" />
+//               Save Changes
+//             </Button>
 //           </div>
 //         </DialogContent>
 //       </Dialog>
 //     </div>
-//   )
+//   );
 // }
 
 
+"use client";
 
-"use client"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
-import { BottomNav } from "@/components/ui/bottom-nav"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { UserReviews } from "@/components/ratings/user-reviews"
-import { RatingDisplay } from "@/components/ratings/rating-display"
-import { LogOut, Edit3, Upload, Plus, Camera, RefreshCw } from "lucide-react"
+import { BottomNav } from "@/components/ui/bottom-nav";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { UserReviews } from "@/components/ratings/user-reviews";
+import { RatingDisplay } from "@/components/ratings/rating-display";
+import {
+  LogOut,
+  Edit,
+  Plus,
+  Loader2,
+  Mail,
+  MapPin,
+  Calendar,
+  Camera,
+  Save,
+  TrendingUp,
+  Package,
+  Star,
+  CheckCircle,
+} from "lucide-react";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useTermsGate } from "@/hooks/use-terms-gate";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
-  const [user, setUser] = useState<any>(null)
+  useTermsGate();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { toast } = useToast();
+
+  const [user, setUser] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const [userStats, setUserStats] = useState({
     averageRating: 0,
     totalRatings: 0,
     activeListings: 0,
     completedTrades: 0,
-  })
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [loadingStats, setLoadingStats] = useState(false)
+  });
+
   const [editData, setEditData] = useState({
     username: "",
     email: "",
+    avatar_url: "",
     phone: "",
-    bio: "",
-    avatarFile: null as File | null,
-    avatarPreview: "",
-  })
-  const router = useRouter()
-  const { toast } = useToast()
+  });
 
-  // ✅ Sync session with localStorage
+  // Auth Resolution
   useEffect(() => {
-    if (session?.auth_token) {
-      localStorage.setItem("auth_token", session.auth_token)
-      localStorage.setItem("user", JSON.stringify(session.user))
-    }
-  }, [session])
+    let resolvedUser: any = null;
 
-  // ✅ Load user and stats
-  useEffect(() => {
-    if (status === "loading") return
+    if (session?.user) {
+      resolvedUser = session.user;
+      localStorage.setItem("user", JSON.stringify(session.user));
 
-    const stored = localStorage.getItem("user")
-    const localUser = stored ? JSON.parse(stored) : null
-    const effectiveUser = session?.user || localUser
-
-    if (!effectiveUser) {
-      router.push("/auth")
-      return
-    }
-
-    setUser(effectiveUser)
-    setEditData((prev) => ({
-      ...prev,
-      username: effectiveUser.username || effectiveUser.name || "",
-      email: effectiveUser.email || "",
-      phone: effectiveUser.phone || "",
-      bio: effectiveUser.bio || "",
-      avatarPreview: effectiveUser.avatar_url || effectiveUser.image || "",
-    }))
-
-    // Fetch stats only if we have a valid user
-    fetchUserStats(effectiveUser)
-  }, [status, session, router])
-
-  // ✅ Fetch Stats (handles both local and Google users)
-  const fetchUserStats = async (effectiveUser: any) => {
-    try {
-      setLoadingStats(true)
-      const userId = Number(effectiveUser.user_id || effectiveUser.id)
-
-      if (!userId || isNaN(userId)) {
-        console.error("Invalid user id for stats:", effectiveUser)
-        return
+      const token = (session as any)?.auth_token;
+      if (token) {
+        localStorage.setItem("auth_token", token);
       }
+    }
 
-      const res = await fetch(`/api/user/${userId}/stats`)
-      const data = await res.json()
+    if (!resolvedUser) {
+      const stored = localStorage.getItem("user");
+      if (stored && stored !== "undefined") {
+        try {
+          resolvedUser = JSON.parse(stored);
+        } catch {
+          localStorage.removeItem("user");
+          localStorage.removeItem("auth_token");
+        }
+      }
+    }
+
+    if (!resolvedUser || !(resolvedUser.user_id || resolvedUser.id)) {
+      router.replace("/auth");
+      return;
+    }
+
+    setUser(resolvedUser);
+
+    setEditData({
+      username: resolvedUser.username || resolvedUser.name || "",
+      email: resolvedUser.email || "",
+      avatar_url: resolvedUser.avatar_url || resolvedUser.image || "",
+      phone: resolvedUser.phone || "",
+    });
+
+    fetchUserStats(resolvedUser);
+  }, [session, router]);
+
+  const fetchUserStats = async (u: any) => {
+    try {
+      setLoadingStats(true);
+      const userId = Number(u.user_id || u.id);
+      if (!userId) return;
+
+      const res = await fetch(`/api/user/${userId}/stats`);
+      const data = await res.json();
 
       if (res.ok) {
-        // Normalize both snake_case and camelCase responses
         setUserStats({
-          averageRating: data.average_rating ?? data.averageRating ?? 0,
-          totalRatings: data.total_ratings ?? data.totalRatings ?? 0,
-          activeListings: data.active_listings ?? data.activeListings ?? 0,
-          completedTrades: data.completed_trades ?? data.completedTrades ?? 0,
-        })
-      } else {
-        console.error("Failed to fetch stats:", data.error)
+          averageRating: data.average_rating ?? 0,
+          totalRatings: data.total_ratings ?? 0,
+          activeListings: data.active_listings ?? 0,
+          completedTrades: data.completed_trades ?? 0,
+        });
       }
     } catch (err) {
-      console.error("Stats fetch failed:", err)
+      console.error("Stats fetch failed", err);
     } finally {
-      setLoadingStats(false)
+      setLoadingStats(false);
     }
-  }
+  };
 
-  // ✅ Logout
-  const handleLogout = () => {
-    localStorage.removeItem("auth_token")
-    localStorage.removeItem("user")
-    signOut({ callbackUrl: "/auth" })
-  }
+  // ✅ FIXED: Image Upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // ✅ Handle image upload
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setIsUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append("files", file)
-      const res = await fetch("/api/upload", { method: "POST", body: formData })
-      const data = await res.json()
-
-      if (res.ok && data.urls?.length > 0) {
-        setEditData((prev) => ({
-          ...prev,
-          avatarFile: file,
-          avatarPreview: data.urls[0],
-        }))
-        toast({ title: "Uploaded!", description: "Profile image uploaded successfully." })
-      } else {
-        toast({
-          title: "Upload Failed",
-          description: data.error || "Error uploading profile image.",
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Upload Failed",
-        description: "Unable to upload image. Try again.",
+        title: "Invalid file type",
+        description: "Please select an image file",
         variant: "destructive",
-      })
-    } finally {
-      setIsUploading(false)
+      });
+      return;
     }
-  }
 
-  // ✅ Save local changes
-  const handleSaveProfile = () => {
-    const updatedUser = { ...user, ...editData, avatar_url: editData.avatarPreview }
-    localStorage.setItem("user", JSON.stringify(updatedUser))
-    setUser(updatedUser)
-    setIsDialogOpen(false)
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been updated successfully.",
-    })
-  }
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  // --- Loading states ---
-  if (status === "loading" && !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        Loading profile...
-      </div>
-    )
-  }
+    setUploadingImage(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.urls && data.urls[0]) {
+        setEditData(prev => ({ ...prev, avatar_url: data.urls[0] }));
+        
+        toast({
+          title: "Image uploaded",
+          description: "Profile picture updated successfully",
+        });
+      } else {
+        throw new Error(data.error || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast({
+        title: "Upload failed",
+        description: err instanceof Error ? err.message : "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user");
+    await signOut({ callbackUrl: "/auth" });
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      const userId = user.user_id || user.id;
+
+      // ✅ Save to database via API
+      const res = await fetch(`/api/user/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: editData.username,
+          avatar_url: editData.avatar_url,
+          phone: editData.phone,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+
+      const data = await res.json();
+
+      // ✅ Update local storage and state
+      const updated = {
+        ...user,
+        username: editData.username,
+        avatar_url: editData.avatar_url,
+        phone: editData.phone,
+      };
+
+      localStorage.setItem("user", JSON.stringify(updated));
+      setUser(updated);
+      setIsDialogOpen(false);
+
+      toast({
+        title: "Profile updated",
+        description: "Your changes have been saved",
+      });
+    } catch (err) {
+      console.error("Profile update error:", err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        No user found
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 pt-10 space-y-8">
-        {/* Profile Header */}
-        <Card className="p-6 text-center shadow-md">
-          <div className="flex flex-col items-center space-y-3">
-            <div className="relative">
-              <Avatar className="h-28 w-28 ring-4 ring-muted">
-                <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
-                <AvatarFallback className="text-3xl">
-                  {user.username?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <Button
-                size="icon"
-                variant="secondary"
-                className="absolute bottom-2 right-2 rounded-full shadow-md"
-                onClick={() => setIsDialogOpen(true)}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">{user.username}</h2>
-              <p className="text-muted-foreground">{user.email}</p>
-            </div>
-            {user.bio && <p className="text-sm text-muted-foreground">{user.bio}</p>}
-            <div className="flex justify-center gap-2 mt-2">
-              <Badge variant="outline" className="capitalize">
-                {user.user_type?.replace("_", " ") || "user"}
-              </Badge>
-              <RatingDisplay rating={userStats.averageRating} count={userStats.totalRatings} size="sm" />
+      {/* Header Section */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+            {/* Avatar */}
+            <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
+              <AvatarImage src={user.avatar_url || user.image} />
+              <AvatarFallback className="text-4xl font-semibold bg-gradient-to-br from-primary/20 to-primary/5">
+                {user.username?.charAt(0)?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* User Info */}
+            <div className="flex-1 space-y-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">
+                    {user.username || user.name}
+                  </h1>
+                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Mail className="h-4 w-4" />
+                      {user.email}
+                    </div>
+                    {user.location_text && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {user.location_text}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit Profile
+                </Button>
+              </div>
+
+              {user.bio && (
+                <p className="text-muted-foreground max-w-2xl">
+                  {user.bio}
+                </p>
+              )}
+
+              <div className="flex items-center gap-3">
+                <RatingDisplay
+                  rating={userStats.averageRating}
+                  count={userStats.totalRatings}
+                  size="md"
+                />
+                <Badge variant="outline" className="gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {user.created_at 
+                    ? `Joined ${new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`
+                    : 'Member'}
+                </Badge>
+              </div>
             </div>
           </div>
-        </Card>
+        </div>
+      </div>
 
-        {/* Stats */}
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8 space-y-8 max-w-5xl">
+        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Active Listings", value: userStats.activeListings },
-            { label: "Completed Trades", value: userStats.completedTrades },
-            { label: "Reviews", value: userStats.totalRatings },
-            { label: "Rating", value: userStats.averageRating.toFixed(1) },
-          ].map((stat, idx) => (
-            <Card key={idx} className="shadow-sm hover:shadow-md transition">
-              <CardContent className="p-4 text-center">
-                <p className="text-xl font-semibold">
-                  {loadingStats ? <RefreshCw className="h-4 w-4 animate-spin inline" /> : stat.value}
-                </p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </CardContent>
-            </Card>
-          ))}
+            {
+              label: "Active Listings",
+              value: userStats.activeListings,
+              icon: Package,
+              color: "text-blue-600",
+            },
+            {
+              label: "Completed Trades",
+              value: userStats.completedTrades,
+              icon: CheckCircle,
+              color: "text-green-600",
+            },
+            {
+              label: "Total Reviews",
+              value: userStats.totalRatings,
+              icon: Star,
+              color: "text-yellow-600",
+            },
+            {
+              label: "Rating",
+              value: userStats.averageRating.toFixed(1),
+              icon: TrendingUp,
+              color: "text-purple-600",
+            },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <Icon className={`h-5 w-5 ${stat.color}`} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-2xl font-bold">
+                      {loadingStats ? (
+                        <Loader2 className="h-5 w-5 animate-spin inline" />
+                      ) : (
+                        stat.value
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      {stat.label}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Quick Actions */}
-        <Card className="shadow-sm">
+        <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3">
-            <Button onClick={() => router.push("/post")}>
-              <Plus className="h-4 w-4 mr-2" />
+          <CardContent className="flex gap-3">
+            <Button onClick={() => router.push("/post")} className="gap-2">
+              <Plus className="h-4 w-4" />
               Create Listing
             </Button>
-            <Button variant="outline" onClick={() => router.push("/offers")}>
-              My Offers
+            <Button
+              variant="outline"
+              onClick={() => router.push("/home")}
+              className="gap-2"
+            >
+              Browse Listings
             </Button>
           </CardContent>
         </Card>
 
         {/* Reviews */}
-        <UserReviews userId={user.id || user.user_id} />
+        <UserReviews userId={user.user_id || user.id} />
 
         {/* Logout */}
-        <Button variant="destructive" className="w-full" onClick={handleLogout}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
+        <Button
+          variant="outline"
+          className="w-full gap-2 text-destructive hover:text-destructive"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Sign Out
         </Button>
       </div>
 
       <BottomNav />
 
-      {/* Edit Profile Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+
+          <div className="space-y-6 py-4">
             {/* Avatar Upload */}
-            <div className="flex flex-col items-center space-y-3">
-              <div className="relative">
-                <Avatar className="h-24 w-24 ring-4 ring-muted">
-                  <AvatarImage src={editData.avatarPreview || "/placeholder.svg"} />
-                  <AvatarFallback>{editData.username?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
-                <label className="absolute bottom-1 right-1 cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <div className="bg-primary text-primary-foreground rounded-full p-2 shadow hover:scale-105 transition">
-                    {isUploading ? (
-                      <Upload className="h-4 w-4 animate-pulse" />
-                    ) : (
+            <div className="flex flex-col items-center gap-4">
+              <Avatar className="h-24 w-24 border-2">
+                <AvatarImage src={editData.avatar_url} />
+                <AvatarFallback className="text-2xl">
+                  {editData.username?.charAt(0)?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+
+              <Label
+                htmlFor="avatar-upload"
+                className="cursor-pointer"
+              >
+                <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-accent transition-colors">
+                  {uploadingImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="text-sm">Uploading...</span>
+                    </>
+                  ) : (
+                    <>
                       <Camera className="h-4 w-4" />
-                    )}
-                  </div>
-                </label>
-              </div>
+                      <span className="text-sm">Change Photo</span>
+                    </>
+                  )}
+                </div>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  className="hidden"
+                />
+              </Label>
+            </div>
+
+            {/* Username */}
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={editData.username}
+                onChange={(e) =>
+                  setEditData({ ...editData, username: e.target.value })
+                }
+                placeholder="Your username"
+              />
+            </div>
+
+            {/* Email (Read-only) */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={editData.email}
+                disabled
+                className="bg-muted cursor-not-allowed"
+              />
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={editData.phone}
+                onChange={(e) =>
+                  setEditData({ ...editData, phone: e.target.value })
+                }
+                placeholder="+92 300 1234567"
+              />
               <p className="text-xs text-muted-foreground">
-                Click the camera icon to upload a new profile picture.
+                Required for SMS OTP verification
               </p>
             </div>
 
-            {/* Editable Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={editData.username}
-                  onChange={(e) => setEditData({ ...editData, username: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editData.email}
-                  onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                />
-              </div>
-              <div className="col-span-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  rows={3}
-                  value={editData.bio}
-                  onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                />
-              </div>
-            </div>
+          </div>
 
-            <div className="flex gap-3 mt-6">
-              <Button variant="outline" className="flex-1" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button className="flex-1" onClick={handleSaveProfile}>
-                Save Changes
-              </Button>
-            </div>
+          {/* Actions */}
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setIsDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 gap-2"
+              onClick={handleSaveProfile}
+              disabled={uploadingImage}
+            >
+              <Save className="h-4 w-4" />
+              Save Changes
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

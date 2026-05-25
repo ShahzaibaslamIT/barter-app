@@ -822,9 +822,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     location_text: "",
   });
 
+  const [otpVia, setOtpVia] = useState<"email" | "phone" | "whatsapp">("email");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -838,8 +838,8 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       const body =
         mode === "login"
-          ? { email: formData.email, password: formData.password }
-          : formData;
+          ? { email: formData.email, password: formData.password, otp_via: otpVia }
+          : { ...formData, otp_via: otpVia };
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -854,28 +854,32 @@ export function AuthForm({ mode }: AuthFormProps) {
         return;
       }
 
-      // SIGNUP FLOW → requires OTP
+      const verifyParams = new URLSearchParams({
+        email: data.email,
+        via: data.otp_sent_via || "email",
+        ...(data.has_phone && data.phone_hint ? { phone_hint: data.phone_hint } : {}),
+        ...(data.has_phone ? { has_phone: "true" } : {}),
+      });
+
+      // SIGNUP FLOW
       if (mode === "signup") {
         toast({
           title: "Account Created",
-          description: data.message || "Please verify your email.",
+          description: data.message || "Please verify your account.",
         });
-
         setTimeout(() => {
-          router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`);
+          router.push(`/auth/verify?${verifyParams.toString()}`);
         }, 600);
-
         return;
       }
 
-      // LOGIN FLOW → also requires OTP
+      // LOGIN FLOW
       if (mode === "login") {
         toast({
           title: "OTP Sent",
-          description: "Please check your email for the verification code.",
+          description: data.message || "Please check for the verification code.",
         });
-
-        router.push(`/auth/verify?email=${encodeURIComponent(data.email)}`);
+        router.push(`/auth/verify?${verifyParams.toString()}`);
         return;
       }
     } catch (error) {
@@ -915,14 +919,59 @@ export function AuthForm({ mode }: AuthFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>Phone (Optional)</Label>
+                <Label>Phone</Label>
                 <Input
+                  type="tel"
+                  placeholder="+92 300 1234567"
                   value={formData.phone}
-                  onChange={(e) =>
-                    setFormData((p) => ({ ...p, phone: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    setFormData((p) => ({ ...p, phone: e.target.value }));
+                    if (!e.target.value) setOtpVia("email");
+                  }}
                 />
               </div>
+
+              {/* OTP channel selector — shown only when phone is entered */}
+              {formData.phone.trim() && (
+                <div className="space-y-2">
+                  <Label>Send verification code via</Label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setOtpVia("email")}
+                      className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                        otpVia === "email"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      Email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOtpVia("phone")}
+                      className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                        otpVia === "phone"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      SMS
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOtpVia("whatsapp")}
+                      className={`flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                        otpVia === "whatsapp"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      WhatsApp
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>I am a...</Label>

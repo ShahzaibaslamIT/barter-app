@@ -18,7 +18,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
       {children}
-      <Toaster />  {/* ✅ REQUIRED for toast notifications */}
+      <Toaster />
     </SessionProvider>
   );
 }

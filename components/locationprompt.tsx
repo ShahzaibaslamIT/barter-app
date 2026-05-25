@@ -48,27 +48,105 @@
 // }
 
 
+// "use client";
+
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { useState } from "react";
+// import { useGeolocation } from "@/hooks/use-geolocation";
+// import { LocateFixed } from "lucide-react";
+
+// export default function LocationPrompt({ onSuccess }: { onSuccess: () => void }) {
+//   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+//   const { updateLocation, error } = useGeolocation();
+
+//   const handleAllow = async () => {
+//     setStatus("loading");
+//     try {
+//       // ✅ Try native bridge first, then fallback
+//       await updateLocation();
+//       setStatus("idle");
+//       onSuccess();
+//     } catch (err) {
+//       // console.error("❌ LocationPrompt error:", err);
+//       setStatus("error");
+//     }
+//   };
+
+//   return (
+//     <Card className="max-w-md mx-auto mt-20 text-center p-8 shadow-lg border border-border/50 bg-gradient-to-br from-background via-muted/20 to-background">
+//       <CardHeader>
+//         <CardTitle className="text-xl font-semibold text-primary">
+//           Enable Location Access
+//         </CardTitle>
+//       </CardHeader>
+//       <CardContent>
+//         <p className="text-muted-foreground mb-6">
+//           We use your location to show nearby items, services, and barter opportunities around you.
+//         </p>
+
+//         {status === "error" || error ? (
+//           <p className="text-red-500 text-sm mb-4">
+//             Unable to detect location automatically. Please check app or device permissions.
+//           </p>
+//         ) : null}
+
+//         <div className="flex justify-center gap-3">
+//           <Button
+//             onClick={handleAllow}
+//             disabled={status === "loading"}
+//             className="flex items-center gap-2"
+//           >
+//             <LocateFixed className="h-4 w-4" />
+//             {status === "loading" ? "Detecting..." : "Enable Location"}
+//           </Button>
+
+//           <Button
+//             variant="outline"
+//             onClick={() => onSuccess()}
+//             className="flex items-center gap-2"
+//           >
+//             Continue Without
+//           </Button>
+//         </div>
+//       </CardContent>
+//     </Card>
+//   );
+// }
+
+
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useState } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
-import { LocateFixed } from "lucide-react";
+import { LocateFixed, MapPinOff } from "lucide-react";
 
-export default function LocationPrompt({ onSuccess }: { onSuccess: () => void }) {
+interface LocationPromptProps {
+  onSuccess: () => void;
+  onSkip: () => void;
+}
+
+export default function LocationPrompt({
+  onSuccess,
+  onSkip,
+}: LocationPromptProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
-  const { updateLocation, error } = useGeolocation();
+  const { updateLocation } = useGeolocation();
 
   const handleAllow = async () => {
     setStatus("loading");
     try {
-      // ✅ Try native bridge first, then fallback
       await updateLocation();
       setStatus("idle");
       onSuccess();
-    } catch (err) {
-      // console.error("❌ LocationPrompt error:", err);
+    } catch {
       setStatus("error");
     }
   };
@@ -80,16 +158,19 @@ export default function LocationPrompt({ onSuccess }: { onSuccess: () => void })
           Enable Location Access
         </CardTitle>
       </CardHeader>
+
       <CardContent>
         <p className="text-muted-foreground mb-6">
-          We use your location to show nearby items, services, and barter opportunities around you.
+          We use your location to show nearby items, services, and barter
+          opportunities around you.
         </p>
 
-        {status === "error" || error ? (
+        {status === "error" && (
           <p className="text-red-500 text-sm mb-4">
-            Unable to detect location automatically. Please check app or device permissions.
+            Unable to detect location automatically. You can continue without
+            location.
           </p>
-        ) : null}
+        )}
 
         <div className="flex justify-center gap-3">
           <Button
@@ -103,9 +184,10 @@ export default function LocationPrompt({ onSuccess }: { onSuccess: () => void })
 
           <Button
             variant="outline"
-            onClick={() => onSuccess()}
+            onClick={onSkip}
             className="flex items-center gap-2"
           >
+            <MapPinOff className="h-4 w-4" />
             Continue Without
           </Button>
         </div>

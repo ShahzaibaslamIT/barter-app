@@ -118,6 +118,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { getUserFromRequest } from "@/lib/auth"
+import { sendPushNotification } from "@/lib/send-notification"
+import { enforceUserStatus } from "@/lib/user-status"
 
 // ------------------- POST (create a new barter offer) -------------------
 export async function POST(request: NextRequest) {
@@ -126,6 +128,10 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    // Check if user is suspended/banned/blacklisted
+    const statusBlock = await enforceUserStatus(Number(user.user_id));
+    if (statusBlock) return statusBlock;
 
     const { listing_id, offered_listing_id, message } = await request.json()
 
@@ -177,6 +183,20 @@ export async function POST(request: NextRequest) {
           content: message.trim(),
         },
       })
+    }
+    // 🔔 Send push notification to listing owner
+    if (offer.listing.user_id !== Number(user.user_id)) {
+      sendPushNotification({
+        userId: offer.listing.user_id,
+        title: "New Offer Received! 🤝",
+        body: `${offer.offerer.username} wants to trade for your "${offer.listing.title}"`,
+        url: `/offers`,
+        data: {
+          type: "new_offer",
+          offer_id: String(offer.offer_id),
+          listing_id: String(offer.listing_id),
+        },
+      }).catch((err: unknown) => console.error("[Notify] Failed:", err));
     }
 
     return NextResponse.json({ offer, thread }, { status: 201 })
