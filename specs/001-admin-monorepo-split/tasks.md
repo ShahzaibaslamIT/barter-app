@@ -29,19 +29,19 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 **Purpose**: Stand up the monorepo scaffolding without moving any existing source code. After this phase, the current single-app build at the repo root must continue to work unchanged.
 
-- [ ] T001 Enable corepack and pin pnpm via `corepack enable && corepack use pnpm@latest`, then add `"packageManager": "pnpm@9.x"` to `package.json`
-- [ ] T002 [P] Create `pnpm-workspace.yaml` declaring `apps/*` and `packages/*` as workspaces (file does not yet contain workspaces — directories are created in later tasks)
-- [ ] T003 [P] Create `turbo.json` at repo root with `dev`, `build`, `lint` pipelines and `packages/db#build` declared with `dependsOn: ["^build"]`
-- [ ] T004 Restructure root `package.json` into a workspace root: set `"private": true`, replace app-specific scripts with `pnpm`/`turbo` orchestration scripts (`"dev": "turbo run dev"`, `"build": "turbo run build"`, `"lint": "turbo run lint"`, `"db:generate"`, `"db:migrate"`), and remove direct Next.js dependencies that will move into `apps/web` in Phase 2
-- [ ] T005 [P] Create `apps/.gitkeep` so the directory exists in git before any moves
-- [ ] T006 [P] Create `packages/.gitkeep` for the same reason
-- [ ] T007 [P] Create `packages/config/package.json` declaring name `@barter/config`, `private: true`, exports for `./eslint/base`, `./tsconfig.base.json`, `./tailwind/base`
-- [ ] T008 [P] Create `packages/config/eslint/base.js` containing the existing Next.js / TypeScript ESLint config (currently inferred from `next lint` defaults — externalise here)
-- [ ] T009 [P] Create `packages/config/tsconfig.base.json` with current compiler options (strict, target ES2022, jsx preserve, paths empty — apps add their own aliases)
-- [ ] T010 [P] Create `packages/config/tailwind/base.js` exporting a Tailwind preset built from the existing Tailwind v4 config
-- [ ] T011 Run `pnpm install` from repo root and confirm workspace links resolve. `pnpm ls --depth -1` must show `@barter/config` as a workspace package.
+- [x] T001 Add `"packageManager": "pnpm@9.15.0"` to `package.json`. **Deferred to user**: `corepack enable && corepack use pnpm@9.15.0` is a machine-level setup step the user runs locally before T011.
+- [x] T002 [P] Created `pnpm-workspace.yaml` declaring `apps/*` and `packages/*`
+- [x] T003 [P] Created `turbo.json` at repo root with `dev`, `build`, `lint`, `generate` pipelines and `dependsOn: ["^build"]` on the `build` task
+- [ ] T004 **Deferred to Phase 2 start.** As written, T004 removes Next.js deps from root `package.json` — this would break the current single-app build at the repo root, violating US6 ("main always deployable") because Phase 2 hasn't moved files into `apps/web` yet. Will execute the script/dep restructure together with T012 (the actual file move into `apps/web`).
+- [x] T005 [P] Created `apps/.gitkeep`
+- [x] T006 [P] Created `packages/.gitkeep`
+- [x] T007 [P] Created `packages/config/package.json` (name `@barter/config`, private, exports for `./eslint/base`, `./tsconfig.base.json`, `./tailwind/base`)
+- [x] T008 [P] Created `packages/config/eslint/base.js` extending `next/core-web-vitals` + `next/typescript`
+- [x] T009 [P] Created `packages/config/tsconfig.base.json` (strict, target ES2022, jsx preserve, moduleResolution bundler)
+- [x] T010 [P] Created `packages/config/tailwind/base.js` exporting the Tailwind v4 preset (dark mode, colors, radius, animations)
+- [ ] T011 **Deferred to user** (machine-level step). After this PR lands, run from the repo root: `corepack enable && corepack use pnpm@9.15.0 && pnpm install`. Then confirm `pnpm ls --depth -1` shows `@barter/config` as a workspace package.
 
-**Checkpoint**: Monorepo scaffolding is in place; the existing app at repo root still runs via `pnpm dev` (which delegates to `turbo run dev`, which finds no workspaces yet — root `next dev` continues working through Turbo passthrough or a temporary root `dev` script). `main` must be deployable.
+**Checkpoint**: Monorepo scaffolding is in place additively. The existing app at the repo root continues to run via `next dev` (the existing scripts in `package.json` were intentionally **not** rewritten yet — that lands together with the apps/web file move in Phase 2). `main` is deployable. After the user runs `pnpm install` locally, `pnpm ls --depth -1` should show `@barter/config` as a workspace package.
 
 ---
 
