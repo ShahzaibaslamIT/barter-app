@@ -1,0 +1,17 @@
+{
+  "name": "@barter/config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "Shared ESLint, TypeScript, and Tailwind configuration for the barter-app monorepo.",
+  "exports": {
+    "./eslint/base": "./eslint/base.js",
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tailwind/base": "./tailwind/base.js"
+  },
+  "files": [
+    "eslint",
+    "tailwind",
+    "tsconfig.base.json"
+  ]
+}
