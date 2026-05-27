@@ -93,6 +93,7 @@ import "./globals.css"
 import { Providers } from "./providers"
 import NotificationProvider from "@/components/NotificationProvider"
 import RegisterSW from "@/components/RegisterSW"
+import StatusBanner from "@/components/StatusBanner"
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -139,6 +140,7 @@ export default function RootLayout({
         <Providers>
            <RegisterSW />
            <NotificationProvider />
+           <StatusBanner />
            {children}
         </Providers>
       </body>

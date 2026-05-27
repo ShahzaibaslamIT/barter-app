@@ -142,10 +142,17 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const blockedStatus =
+    searchParams?.get("error") === "AccountBlocked"
+      ? searchParams.get("status")
+      : null;
 
   const { data: session, status } = useSession();
 
@@ -199,6 +206,26 @@ export default function AuthPage() {
             Trade items and services in your community
           </p>
         </div>
+
+        {blockedStatus ? (
+          <div
+            role="alert"
+            className="border border-red-500/50 bg-red-500/10 text-red-100 rounded-lg px-4 py-3 text-sm"
+          >
+            <strong className="block">
+              {blockedStatus === "banned"
+                ? "Your account has been permanently banned."
+                : blockedStatus === "suspended"
+                  ? "Your account is suspended."
+                  : blockedStatus === "blacklisted"
+                    ? "Your account is blacklisted."
+                    : "Your account is blocked."}
+            </strong>
+            <span className="block opacity-80 mt-1">
+              You cannot sign in. Contact support if you believe this is a mistake.
+            </span>
+          </div>
+        ) : null}
 
         {/* Manual login / signup */}
         <AuthForm mode={mode} />

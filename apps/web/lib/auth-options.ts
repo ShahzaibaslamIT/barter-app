@@ -345,6 +345,76 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     // =========================
+    // SIGN-IN GATE (block suspended / banned / blacklisted users)
+    // =========================
+    async signIn({ user, account, profile }) {
+      // Resolve the email being signed in with
+      const email =
+        (account?.provider === "google" ? profile?.email : user?.email)
+          ?.toLowerCase();
+      if (!email) return true; // let NextAuth handle the missing-email path normally
+
+      const dbUser = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          status: true,
+          suspended_until: true,
+          blacklisted_until: true,
+        },
+      });
+
+      if (!dbUser) return true; // new user — sign-up flow handles creation later
+
+      const now = new Date();
+
+      // Auto-expire suspensions / blacklists at the gate so a returning user is not blocked
+      // by an already-expired sanction (enforceUserStatus does the same downgrade on read).
+      if (
+        dbUser.status === "suspended" &&
+        dbUser.suspended_until &&
+        dbUser.suspended_until <= now
+      ) {
+        await prisma.user.update({
+          where: { email },
+          data: {
+            status: "warned",
+            warning_count: { increment: 1 },
+            suspended_until: null,
+            suspension_reason: null,
+          },
+        });
+        return true;
+      }
+      if (
+        dbUser.status === "blacklisted" &&
+        dbUser.blacklisted_until &&
+        dbUser.blacklisted_until <= now
+      ) {
+        await prisma.user.update({
+          where: { email },
+          data: {
+            status: "warned",
+            warning_count: { increment: 1 },
+            blacklisted_until: null,
+            blacklist_reason: null,
+          },
+        });
+        return true;
+      }
+
+      if (
+        dbUser.status === "banned" ||
+        dbUser.status === "suspended" ||
+        dbUser.status === "blacklisted"
+      ) {
+        // NextAuth sends the user back to the configured error page with this code in ?error=
+        return `/auth?error=AccountBlocked&status=${dbUser.status}`;
+      }
+
+      return true;
+    },
+
+    // =========================
     // JWT CALLBACK
     // =========================
     async jwt({ token, user, account, profile }) {
@@ -470,7 +540,9 @@ export const authOptions: NextAuthOptions = {
       }
 
       /**
-       * 🔁 Always re-check OTP verification
+       * 🔁 Always re-check OTP verification + moderation status on every session read
+       * so a user suspended *after* sign-in is reflected without waiting for the
+       * 30-day session expiry.
        */
       if (token.email) {
     const dbUser = await prisma.user.findUnique({
@@ -479,12 +551,24 @@ export const authOptions: NextAuthOptions = {
         email_verified: true,
         profile_complete: true,
         terms_accepted: true,
+        status: true,
+        suspension_reason: true,
+        suspended_until: true,
+        blacklist_reason: true,
+        blacklisted_until: true,
+        warning_count: true,
       },
     });
 
     token.otp_verified = !!dbUser?.email_verified;
     token.profile_complete = !!dbUser?.profile_complete;
     token.terms_accepted = !!dbUser?.terms_accepted;
+    token.user_status = dbUser?.status ?? "active";
+    token.suspension_reason = dbUser?.suspension_reason ?? null;
+    token.suspended_until = dbUser?.suspended_until?.toISOString() ?? null;
+    token.blacklist_reason = dbUser?.blacklist_reason ?? null;
+    token.blacklisted_until = dbUser?.blacklisted_until?.toISOString() ?? null;
+    token.warning_count = dbUser?.warning_count ?? 0;
   }
 
 
@@ -503,6 +587,14 @@ export const authOptions: NextAuthOptions = {
 
     (session.user as any).profile_complete = !!token.profile_complete;
     (session.user as any).terms_accepted = !!token.terms_accepted;
+
+    // Moderation status exposed to the client so middleware + StatusBanner can react
+    (session.user as any).status = token.user_status ?? "active";
+    (session.user as any).suspension_reason = token.suspension_reason ?? null;
+    (session.user as any).suspended_until = token.suspended_until ?? null;
+    (session.user as any).blacklist_reason = token.blacklist_reason ?? null;
+    (session.user as any).blacklisted_until = token.blacklisted_until ?? null;
+    (session.user as any).warning_count = token.warning_count ?? 0;
 
     session.user.name = token.name as string;
     session.user.email = token.email as string;
