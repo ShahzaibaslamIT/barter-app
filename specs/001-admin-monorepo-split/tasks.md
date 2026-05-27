@@ -53,14 +53,15 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Relocate the user app
 
-- [ ] T012 Move all current Next.js source from repo root into `apps/web/`: `app/`, `components/`, `hooks/`, `lib/`, `public/`, `prisma/` (temporarily — moves again in T020), `middleware.ts`, `next.config.mjs`, `tailwind.config.ts`, `postcss.config.mjs`, `tsconfig.json`. Preserve `.git` history via `git mv`.
-- [ ] T013 Create `apps/web/package.json` containing the user-app-specific dependencies (Next.js, NextAuth, Twilio, Resend, Firebase, OneSignal, Cloudinary, Radix UI deps, leaflet, recharts, etc.); leave `@prisma/client` and `prisma` out (move to `@barter/db` in T020–T024); declare `"@barter/config": "workspace:*"`
-- [ ] T014 [P] Update `apps/web/tsconfig.json` to extend `@barter/config/tsconfig.base.json`; preserve existing `paths` aliases for `@/*`
-- [ ] T015 [P] Update `apps/web/.eslintrc.cjs` (create if absent — current setup uses `next lint` default) to extend `@barter/config/eslint/base`
-- [ ] T016 [P] Update `apps/web/tailwind.config.ts` to declare `presets: [require('@barter/config/tailwind/base')]` and keep app-specific `content` paths
-- [ ] T017 Update `apps/web/package.json` dev script to bind port 3000 (`"dev": "next dev -p 3000"`)
-- [ ] T018 Update `turbo.json` to declare `apps/web` outputs (`.next/**`, excluding `.next/cache/**`)
-- [ ] T019 Update the Vercel `barter-web` project: change **Root Directory** to `apps/web`, change **Build Command** to `cd ../.. && turbo run build --filter=web...`, change **Install Command** to `cd ../.. && pnpm install --frozen-lockfile`. Trigger a preview deploy and smoke-test the user app end-to-end (signup, OTP, listing create, discover, messaging) before merging.
+- [x] T012 Moved all current Next.js source from repo root into `apps/web/` via `git mv` (rename status preserved for `app/`, `components/`, `hooks/`, `lib/`, `public/`, `prisma/`, `styles/`, `scripts/`, `middleware.ts`, `next.config.mjs`, `postcss.config.mjs`, `tsconfig.json`, `components.json`). Also copied `.env` / `.env.production` (gitignored, can't `git mv`) into `apps/web/`. Cleaned stale root build artefacts (`.next/`, `tsconfig.tsbuildinfo`, empty `vercel` file).
+- [x] T013 Created `apps/web/package.json` (name `web`, private). Moved every user-app dep from the root manifest. `@prisma/client` and `prisma` remain temporarily — extract in T020–T024. Declared `"@barter/config": "workspace:*"`.
+- [x] T014 [P] Rewrote `apps/web/tsconfig.json` to extend `@barter/config/tsconfig.base.json`; preserved the `@/*` path alias and the Next.js plugin entry. Kept `target: ES6` and `allowJs` as app-specific overrides.
+- [x] T015 [P] Created `apps/web/.eslintrc.cjs` extending `@barter/config/eslint/base` (root: true so children don't merge upward).
+- [~] T016 [P] **Not applicable**: this project uses Tailwind v4 CSS-first configuration (theme tokens live in `apps/web/app/globals.css` via `@theme`). There is no `tailwind.config.ts` to update. The shared `packages/config/tailwind/base.js` preset is v3-style and will be converted to a v4 CSS preset in a follow-up if/when both apps need shared tokens. Tracked as an open item.
+- [x] T017 Dev script in `apps/web/package.json` set to `"next dev -p 3000"`. Start script also bound to `-p 3000` for consistency.
+- [x] T018 Updated root `turbo.json`: corrected `globalDependencies` to `**/.env` + `**/.env.*` (monorepo-aware), added `NEXTAUTH_SECRET` and `NEXTAUTH_URL` to `globalEnv`. Outputs glob `.next/**` already correct — Turbo scopes outputs per workspace package automatically.
+- [x] T018b Slimmed root `package.json` to workspace tooling only (`turbo` devDep + orchestration scripts `dev`/`build`/`lint`/`generate`). All user-app deps now live in `apps/web/package.json`.
+- [ ] T019 **Local smoke test passed** (2026-05-27): `pnpm install` succeeded (≈53m, slow network — `node_modules` linker is `hoisted` per [[feedback_pnpm_hoisted_linker]]); `pnpm --filter web dev` boots Next 15.5.9 on `:3000` reading `.env` from `apps/web/`; `/home`, `/auth`, `/discover`, `/api/listings` all return 200. Prisma client generated to `node_modules/@prisma/client` via the `apps/web` `postinstall` hook. **Vercel reconfig pending (user-driven step)**: barter-app project Root Directory → `apps/web`, Build Command → `cd ../.. && turbo run build --filter=web...`, Install Command → `cd ../.. && pnpm install --frozen-lockfile`.
 
 ### Extract `@barter/db` (per ADR-0003)
 
