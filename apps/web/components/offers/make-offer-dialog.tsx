@@ -57,16 +57,15 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
   const fetchMyListings = async () => {
     setIsLoadingListings(true)
     try {
-      const token = localStorage.getItem("auth_token")
-      const user = JSON.parse(localStorage.getItem("user") || "{}")
-
-      const response = await fetch(`/api/users/${user.id}/listings`, {
-        headers: { Authorization: `Bearer ${token}` },
+      // Use the session-backed "my listings" endpoint. The cookie is sent
+      // automatically with credentials:"include" — no localStorage token.
+      const response = await fetch("/api/listings/mine", {
+        credentials: "include",
       })
 
       const data = await response.json()
       if (response.ok) {
-        setMyListings(data.listings)
+        setMyListings(data.listings || [])
       }
     } catch (error) {
       console.error("Failed to fetch listings:", error)
@@ -80,15 +79,13 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
     setIsLoading(true)
 
     try {
-      const token = localStorage.getItem("auth_token")
-
-      // Step 1: Create the barter offer
+      // Step 1: Create the barter offer. Auth rides on the NextAuth session
+      // cookie (credentials:"include") — sending "Bearer null" here used to
+      // short-circuit the server's auth and 401 every logged-in user.
       const response = await fetch("/api/barter-offers", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           listing_id: targetListing.item_id,
           offered_listing_id: selectedListing || null,
@@ -103,10 +100,8 @@ export function MakeOfferDialog({ isOpen, onClose, targetListing, onSuccess }: M
       if (message && data.thread?.thread_id) {
         await fetch("/api/messages", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             thread_id: data.thread.thread_id,
             content: message.trim(),
