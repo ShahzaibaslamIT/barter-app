@@ -38,13 +38,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { username, avatar_url, phone } = body;
+    const { username, avatar_url, phone, country } = body;
 
     // ✅ Build update data
     const updateData: any = {};
     if (username !== undefined) updateData.username = username;
     if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
     if (phone !== undefined) updateData.phone = phone || null;
+    if (country !== undefined) updateData.country = country || null;
 
     // ✅ Update user in database
     const updatedUser = await prisma.user.update({
@@ -57,6 +58,7 @@ export async function PATCH(
         phone: true,
         avatar_url: true,
         user_type: true,
+        country: true,
         rating: true,
         rating_count: true,
         created_at: true,

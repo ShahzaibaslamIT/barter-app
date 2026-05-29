@@ -572,6 +572,7 @@ export default function ProfilePage() {
     email: "",
     avatar_url: "",
     phone: "",
+    country: "",
   });
 
   // Auth Resolution
@@ -612,9 +613,29 @@ export default function ProfilePage() {
       email: resolvedUser.email || "",
       avatar_url: resolvedUser.avatar_url || resolvedUser.image || "",
       phone: resolvedUser.phone || "",
+      country: resolvedUser.country || "",
     });
 
     fetchUserStats(resolvedUser);
+
+    // The session doesn't carry country/phone — pull the DB values so the
+    // edit form is prefilled correctly (country drives the listing-fee currency).
+    (async () => {
+      try {
+        const res = await fetch("/api/user/me", { credentials: "include" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.user) {
+          setEditData((prev) => ({
+            ...prev,
+            phone: data.user.phone ?? prev.phone,
+            country: data.user.country ?? prev.country,
+          }));
+        }
+      } catch {
+        // ignore — form still works with session-derived values
+      }
+    })();
   }, [session, router]);
 
   const fetchUserStats = async (u: any) => {
@@ -724,6 +745,7 @@ export default function ProfilePage() {
           username: editData.username,
           avatar_url: editData.avatar_url,
           phone: editData.phone,
+          country: editData.country,
         }),
       });
 
@@ -740,6 +762,7 @@ export default function ProfilePage() {
         username: editData.username,
         avatar_url: editData.avatar_url,
         phone: editData.phone,
+        country: editData.country,
       };
 
       localStorage.setItem("user", JSON.stringify(updated));
@@ -1011,6 +1034,22 @@ export default function ProfilePage() {
               />
               <p className="text-xs text-muted-foreground">
                 Required for SMS OTP verification
+              </p>
+            </div>
+
+            {/* Country */}
+            <div className="space-y-2">
+              <Label htmlFor="country">Country</Label>
+              <Input
+                id="country"
+                value={editData.country}
+                onChange={(e) =>
+                  setEditData({ ...editData, country: e.target.value })
+                }
+                placeholder="e.g. Pakistan"
+              />
+              <p className="text-xs text-muted-foreground">
+                Sets the currency your listing fee is shown in.
               </p>
             </div>
 
