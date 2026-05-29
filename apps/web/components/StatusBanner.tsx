@@ -12,7 +12,7 @@ type StatusPayload = {
   warning_count?: number | null;
 };
 
-const POLL_MS = 60_000;
+const POLL_MS = 30_000;
 
 function daysUntil(iso: string | null | undefined): number | null {
   if (!iso) return null;
@@ -44,9 +44,22 @@ export default function StatusBanner() {
 
     fetchOnce();
     const interval = setInterval(fetchOnce, POLL_MS);
+
+    // Refetch the moment the tab regains focus / becomes visible, so a status
+    // change made in another tab (e.g. the admin panel) shows up immediately
+    // instead of waiting for the next poll tick.
+    const onFocus = () => fetchOnce();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") fetchOnce();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+
     return () => {
       cancelled = true;
       clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [pathname]);
 
@@ -83,7 +96,7 @@ export default function StatusBanner() {
   return (
     <div
       role="alert"
-      className={`${color} text-white text-sm px-4 py-2 text-center sticky top-0 z-50 shadow`}
+      className={`${color} text-white text-sm px-4 py-2 text-center sticky top-0 z-[60] shadow`}
     >
       <strong>{title}</strong>
       {body ? <span className="ml-2">{body}</span> : null}
