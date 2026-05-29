@@ -792,13 +792,14 @@ import {
   X,
   Package,
   Wrench,
-  DollarSign,
+  Banknote,
   CalendarDays,
   CheckCircle2,
   AlertCircle,
   XCircle,
 } from "lucide-react";
 import { LocationPicker } from "@/components/location/location-picker";
+import { formatFeeForCountry, DEFAULT_LISTING_FEE } from "@/lib/currency";
 
 interface ListingFormProps {
   type: "item" | "service";
@@ -881,19 +882,22 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
   } | null>(null);
 
   const [settings, setSettings] = useState<{
-    fee_usd: number;
+    fee: number; // base-currency (PKR) listing fee
     expiry_days: number;
   } | null>(null);
 
+  // Viewer's profile country → drives the currency the fee is shown in.
+  const [country, setCountry] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  
+
   const { toast } = useToast();
 
   const categories = type === "item" ? ITEM_CATEGORIES : SERVICE_CATEGORIES;
 
   // ✅ Fetch user profile and auto-fill location
- 
+
   // ✅ Fetch listing fee and expiry settings
   useEffect(() => {
     (async () => {
@@ -902,14 +906,28 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
         const data = await res.json();
         if (res.ok && data?.settings) {
           setSettings({
-            fee_usd: parseFloat(data.settings.listing_fee_usd || "0.99"),
+            fee: parseFloat(data.settings.listing_fee_usd) || DEFAULT_LISTING_FEE,
             expiry_days: data.settings.listing_expiry_days || 30,
           });
         } else {
-          setSettings({ fee_usd: 0.99, expiry_days: 30 });
+          setSettings({ fee: DEFAULT_LISTING_FEE, expiry_days: 30 });
         }
       } catch {
-        setSettings({ fee_usd: 0.99, expiry_days: 30 });
+        setSettings({ fee: DEFAULT_LISTING_FEE, expiry_days: 30 });
+      }
+    })();
+  }, []);
+
+  // ✅ Load the viewer's country so the fee shows in their local currency
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/user/me", { credentials: "include" });
+        if (!res.ok) return;
+        const data = await res.json();
+        setCountry(data?.user?.country ?? null);
+      } catch {
+        // ignore — falls back to base currency (PKR)
       }
     })();
   }, []);
@@ -1177,9 +1195,9 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
           {settings && (
             <div className="flex justify-between items-center border border-border/50 rounded-xl p-4 bg-muted/40">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
+                <Banknote className="h-5 w-5 text-green-600" />
                 <p className="text-sm">
-                  Listing Fee: ${settings.fee_usd.toFixed(2)}
+                  Listing Fee: {formatFeeForCountry(settings.fee, country)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
