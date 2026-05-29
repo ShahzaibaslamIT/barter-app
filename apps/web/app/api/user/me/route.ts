@@ -32,6 +32,13 @@ export async function GET() {
       terms_accepted: true,
       user_type: true,
       avatar_url: true,
+      // Moderation status (read by StatusBanner on the client)
+      status: true,
+      suspension_reason: true,
+      suspended_until: true,
+      blacklist_reason: true,
+      blacklisted_until: true,
+      warning_count: true,
     },
   });
 
