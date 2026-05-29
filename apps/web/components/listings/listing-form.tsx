@@ -799,7 +799,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { LocationPicker } from "@/components/location/location-picker";
-import { formatMoney, DEFAULT_LISTING_FEE } from "@/lib/currency";
+import { formatFeeForCountry, DEFAULT_LISTING_FEE } from "@/lib/currency";
 
 interface ListingFormProps {
   type: "item" | "service";
@@ -886,6 +886,9 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
     expiry_days: number;
   } | null>(null);
 
+  // Viewer's profile country → drives the currency the fee is shown in.
+  const [country, setCountry] = useState<string | null>(null);
+
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -911,6 +914,20 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
         }
       } catch {
         setSettings({ fee: DEFAULT_LISTING_FEE, expiry_days: 30 });
+      }
+    })();
+  }, []);
+
+  // ✅ Load the viewer's country so the fee shows in their local currency
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/user/me", { credentials: "include" });
+        if (!res.ok) return;
+        const data = await res.json();
+        setCountry(data?.user?.country ?? null);
+      } catch {
+        // ignore — falls back to base currency (PKR)
       }
     })();
   }, []);
@@ -1180,7 +1197,7 @@ export function ListingForm({ type, onSuccess }: ListingFormProps) {
               <div className="flex items-center gap-2">
                 <Banknote className="h-5 w-5 text-green-600" />
                 <p className="text-sm">
-                  Listing Fee: {formatMoney(settings.fee)}
+                  Listing Fee: {formatFeeForCountry(settings.fee, country)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
