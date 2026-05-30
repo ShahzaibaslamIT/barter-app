@@ -20,6 +20,9 @@ importers:
       '@barter/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@barter/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@barter/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -261,6 +264,8 @@ importers:
       prisma:
         specifier: ^6.16.1
         version: 6.19.3(typescript@5.9.3)
+
+  packages/types: {}
 
   packages/ui:
     dependencies:
