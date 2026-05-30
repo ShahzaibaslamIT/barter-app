@@ -1,5 +1,5 @@
 // import { notFound } from "next/navigation";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 // import EditListingClient from "./EditListingClient";
 
 // interface PageProps {
@@ -47,7 +47,7 @@
 
 
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import EditListingClient from "./EditListingClient";
 
 export default async function EditListingPage({

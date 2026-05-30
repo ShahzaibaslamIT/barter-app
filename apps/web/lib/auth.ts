@@ -1,7 +1,7 @@
 // import jwt from "jsonwebtoken";
 // import bcrypt from "bcryptjs";
 // import type { NextRequest } from "next/server";
-// import type { UserType } from "@prisma/client";
+// import type { UserType } from "@barter/db";
 
 // // Ensure JWT_SECRET is always a string
 // const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -70,7 +70,7 @@
 // import jwt from "jsonwebtoken"
 // import bcrypt from "bcryptjs"
 // import type { NextRequest } from "next/server"
-// import type { UserType } from "@prisma/client"
+// import type { UserType } from "@barter/db"
 // import { getServerSession } from "next-auth"
 // import { authOptions } from "./auth-options"
 
@@ -149,7 +149,7 @@
 import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import type { NextRequest } from "next/server"
-import type { UserType } from "@prisma/client"
+import type { UserType } from "@barter/db"
 import { getServerSession } from "next-auth"
 import { authOptions } from "./auth-options"
 

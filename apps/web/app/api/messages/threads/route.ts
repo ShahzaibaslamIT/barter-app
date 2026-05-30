@@ -1,6 +1,6 @@
 // // app/api/messages/threads/route.ts
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- GET all threads for current user -------------------
@@ -117,7 +117,7 @@
 
 // app/api/messages/threads/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@barter/db"
 import { getUserFromRequest, getAuthSession } from "@/lib/auth"
 
 // 🔑 Unified auth resolver (works for JWT and NextAuth)

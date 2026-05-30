@@ -1,7 +1,7 @@
 // export const runtime = "nodejs"
 
 // import { type NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- GET (one listing) -------------------
@@ -229,7 +229,7 @@
 export const runtime = "nodejs";
 
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { getUserFromRequest } from "@/lib/auth";
 import { enforceUserStatus } from "@/lib/user-status";
 

@@ -1,5 +1,5 @@
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ---------------- GET ratings for a user ----------------
@@ -186,7 +186,7 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { getUserFromRequest } from "@/lib/auth";
 
 /**

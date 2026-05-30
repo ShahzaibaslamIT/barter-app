@@ -1,5 +1,5 @@
 // import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 
 // export async function GET(
 //   request: NextRequest,
@@ -60,7 +60,7 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 
 export async function GET(
   request: NextRequest,

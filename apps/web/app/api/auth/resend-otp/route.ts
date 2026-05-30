@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { randomInt } from "crypto";
 import { resend } from "@/lib/resend";
 import { sendOTP, maskPhone } from "@/lib/sms";

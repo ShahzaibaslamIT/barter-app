@@ -2,9 +2,9 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminFromRequest, hasPermission } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { createAuditLog } from "@/lib/audit";
-import { ModerationStatus } from "@prisma/client";
+import { ModerationStatus } from "@barter/db";
 
 const ACTION_TO_STATUS: Record<string, ModerationStatus> = {
   approve: "approved",

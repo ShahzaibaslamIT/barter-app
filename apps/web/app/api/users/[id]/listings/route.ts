@@ -1,5 +1,5 @@
 // import { type NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // export async function GET(
@@ -51,7 +51,7 @@
 
 // app/api/users/[id]/listings/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@barter/db"
 import { getUserFromRequest } from "@/lib/auth"
 
 export async function GET(

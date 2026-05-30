@@ -2,7 +2,7 @@
  * One-time script to create the first Super Admin account.
  * Run with: npx tsx scripts/create-admin.ts
  */
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@barter/db";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();

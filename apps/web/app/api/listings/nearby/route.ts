@@ -1,6 +1,6 @@
 // // app/api/listings/nearby/route.ts
 // import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 
 // export async function GET(req: NextRequest) {
 //   try {
@@ -78,7 +78,7 @@
 
 // app/api/listings/nearby/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 
 export async function GET(req: NextRequest) {
   try {

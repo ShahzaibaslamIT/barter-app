@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 
 interface AuditParams {
   admin_id: number;

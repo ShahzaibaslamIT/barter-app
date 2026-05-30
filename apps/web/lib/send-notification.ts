@@ -2,7 +2,7 @@
 // Sends push notifications via OneSignal REST API.
 // Targets users by their stored OneSignal subscription IDs (include_player_ids).
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 
 interface NotificationPayload {
   userId: number | number[];

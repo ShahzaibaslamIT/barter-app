@@ -1,5 +1,5 @@
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // export async function PUT(
@@ -109,7 +109,7 @@
 
 
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // export async function PUT(
@@ -220,7 +220,7 @@
 
 // app/api/barter-offers/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@barter/db"
 import { getUserFromRequest, getAuthSession } from "@/lib/auth"
 import { sendPushNotification } from "@/lib/send-notification"
 

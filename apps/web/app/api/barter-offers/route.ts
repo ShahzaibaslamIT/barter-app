@@ -1,5 +1,5 @@
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- POST (create a new barter offer) -------------------
@@ -116,7 +116,7 @@
 
 
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@barter/db"
 import { getUserFromRequest } from "@/lib/auth"
 import { sendPushNotification } from "@/lib/send-notification"
 import { enforceUserStatus } from "@/lib/user-status"

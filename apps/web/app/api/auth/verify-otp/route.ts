@@ -1,7 +1,7 @@
 // export const runtime = "nodejs";
 
 // import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 // import { generateToken } from "@/lib/auth";
 
 // export async function POST(req: NextRequest) {
@@ -101,7 +101,7 @@
 // export const runtime = "nodejs";
 
 // import { NextRequest, NextResponse } from "next/server";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 
 // export async function POST(req: NextRequest) {
 //   try {
@@ -198,7 +198,7 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { generateToken } from "@/lib/auth";
 import { checkOTP } from "@/lib/sms";
 

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { AdminRole } from "@prisma/client";
+import { AdminRole } from "@barter/db";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 

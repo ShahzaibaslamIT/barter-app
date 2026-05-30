@@ -1,6 +1,6 @@
 // app/api/notifications/register/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { getUserFromRequest } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {

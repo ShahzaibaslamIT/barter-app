@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminFromRequest, hasPermission } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { createAuditLog } from "@/lib/audit";
 
 export async function GET(
