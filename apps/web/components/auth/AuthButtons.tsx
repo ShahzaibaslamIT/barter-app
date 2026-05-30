@@ -1,7 +1,7 @@
 "use client"
 
 import { signIn, signOut, useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
+import { Button } from "@barter/ui"
 
 export function AuthButtons() {
   const { data: session, status } = useSession()

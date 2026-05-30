@@ -2,10 +2,10 @@
 
 // import { useEffect, useState } from "react"
 // import { useRouter } from "next/navigation"
-// import { BottomNav } from "@/components/ui/bottom-nav"
+// import { BottomNav } from "@barter/ui"
 // import { OfferCard } from "@/components/offers/offer-card"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Badge } from "@/components/ui/badge"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
+// import { Badge } from "@barter/ui"
 // import { ArrowUpRight, ArrowDownLeft, Handshake } from "lucide-react"
 
 // interface Offer {
@@ -189,10 +189,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { BottomNav } from "@/components/ui/bottom-nav"
+import { BottomNav } from "@barter/ui"
 import { OfferCard } from "@/components/offers/offer-card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
+import { Badge } from "@barter/ui"
 import { ArrowUpRight, ArrowDownLeft, Handshake } from "lucide-react"
 
 interface Offer {

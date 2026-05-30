@@ -8,7 +8,7 @@ const nextConfig = {
   // @barter/db exports raw TypeScript (src/index.ts) — Next must compile it
   // into the bundle instead of copying the uncompiled .ts into the function,
   // which would throw at runtime. First runtime-imported workspace package.
-  transpilePackages: ["@barter/db"],
+  transpilePackages: ["@barter/db", "@barter/ui"],
   // Trace from the monorepo root so the hoisted Prisma query-engine binary
   // (generated into ../../node_modules by @barter/db) is bundled into the
   // serverless functions.

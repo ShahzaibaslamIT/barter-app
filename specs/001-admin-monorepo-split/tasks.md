@@ -78,13 +78,13 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Extract `@barter/ui` (per ADR-0001)
 
-- [ ] T030 [P] Create `packages/ui/package.json` declaring name `@barter/ui`, `private: true`, dependencies on all `@radix-ui/*` primitives currently used by `apps/web/components/ui/*`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`. Add `"@barter/config": "workspace:*"`.
-- [ ] T031 Move every file under `apps/web/components/ui/` to `packages/ui/src/`. Keep filenames unchanged.
-- [ ] T032 Create `packages/ui/src/index.ts` re-exporting every component (one re-export per file)
-- [ ] T033 Add `"@barter/ui": "workspace:*"` to `apps/web/package.json`
-- [ ] T034 Replace every `import { X } from "@/components/ui/<name>"` in `apps/web/` with `import { X } from "@barter/ui"`. Single codemod PR.
-- [ ] T035 Remove `@radix-ui/*`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react` from `apps/web/package.json` if they are now used only by `@barter/ui` (keep any with direct `apps/web` consumers).
-- [ ] T036 Build and deploy preview; smoke-test the user app UI (any visual regression means a wrapper got dropped during the move — revert immediately and retry per-file).
+- [x] T030 [P] Created `packages/ui/package.json` (`@barter/ui`, private) with `@barter/config` + the full runtime dep set the components import (27 `@radix-ui/*`, cva, clsx, tailwind-merge, lucide-react, cmdk, embla-carousel-react, input-otp, react-day-picker, react-hook-form, react-resizable-panels, recharts, sonner, vaul, next-themes); react/react-dom/next as peers. Also `packages/ui/tsconfig.json`.
+- [x] T031 `git mv` all 52 files under `apps/web/components/ui/` → `packages/ui/src/` (per-file to dodge a Windows dir lock; renames preserved). Added `packages/ui/src/lib/utils.ts` (self-contained `cn`) and rewrote intra-package imports to relative (`@/lib/utils`→`./lib/utils`, `@/components/ui/*`→`./*`, `@/hooks/use-mobile|use-toast`→`./*`).
+- [x] T032 Created `packages/ui/src/index.ts` barrel: `export *` per component + `export { cn }`. **Collision handled**: both `sonner.tsx` and `toaster.tsx` export `Toaster`; sonner's is aliased to `SonnerToaster` so the app-used `./toaster` `Toaster` stays the unqualified export.
+- [x] T033 Added `"@barter/ui": "workspace:*"` to `apps/web/package.json`; added `@barter/ui` to `transpilePackages` in `next.config.mjs` (raw-TS package — see [[reference_transpile_workspace_packages]]).
+- [x] T034 Codemodded 31 app files: `@/components/ui/*` → `@barter/ui`. Also funnelled the toast store through the package — `@/hooks/use-toast` → `@barter/ui` (14 sites incl. the moved `toaster.tsx`→`./use-toast`) so `useToast()`/`toast()` and `<Toaster/>` share **one** module instance. Deleted now-dead `apps/web/hooks/use-toast.ts` + `use-mobile.ts`. Build green (2/2). Committed `3f9da2d`.
+- [~] T035 **Deferred to Phase 8 dep audit (T089/T090).** Most candidate deps (lucide-react, react-hook-form, etc.) still have direct `apps/web` consumers; hoisted linker tolerates the duplication meanwhile (same precedent as T013). Pruning now risks breakage for little gain.
+- [ ] T036 Deploy preview, smoke-test the user app UI for visual regressions (a dropped wrapper during the move shows as broken styling), then merge.
 
 ### Extract `@barter/types`
 

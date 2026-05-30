@@ -4,11 +4,11 @@
 // import { useRouter } from "next/navigation"
 // import { ListingCard } from "@/components/listings/listing-card"
 // import { MapView } from "@/components/marketplace/map-view"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Badge } from "@/components/ui/badge"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { BottomNav } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
 // import {
 //   Search,
 //   MapPin,
@@ -19,9 +19,9 @@
 //   Sparkles,
 // } from "lucide-react"
 // import { useGeolocation } from "@/hooks/use-geolocation"
-// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Alert, AlertDescription } from "@barter/ui"
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
-// import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@barter/ui"
 
 // // DTO
 // interface ListingDTO {
@@ -284,11 +284,11 @@
 // import { useRouter } from "next/navigation"
 // import { ListingCard } from "@/components/listings/listing-card"
 // import { MapView } from "@/components/marketplace/map-view"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Badge } from "@/components/ui/badge"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { BottomNav } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
 // import {
 //   Search,
 //   MapPin,
@@ -299,9 +299,9 @@
 //   Sparkles,
 // } from "lucide-react"
 // import { useGeolocation } from "@/hooks/use-geolocation"
-// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Alert, AlertDescription } from "@barter/ui"
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
-// import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@barter/ui"
 
 // // DTO
 // interface ListingDTO {
@@ -639,11 +639,11 @@
 // import { useRouter } from "next/navigation"
 // import { ListingCard } from "@/components/listings/listing-card"
 // import { MapView } from "@/components/marketplace/map-view"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Badge } from "@/components/ui/badge"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { BottomNav } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
 // import {
 //   Search,
 //   MapPin,
@@ -656,9 +656,9 @@
 //   Wrench,
 // } from "lucide-react"
 // import {useGeolocation}  from "@/hooks/use-geolocation"
-// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Alert, AlertDescription } from "@barter/ui"
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
-// import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@barter/ui"
 
 // // --- DTO ---
 // interface ListingDTO {
@@ -1056,11 +1056,11 @@
 // import { useRouter } from "next/navigation";
 // import { ListingCard } from "@/components/listings/listing-card";
 // import { MapView } from "@/components/marketplace/map-view";
-// import { BottomNav } from "@/components/ui/bottom-nav";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Badge } from "@/components/ui/badge";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { BottomNav } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui";
 // import {
 //   Search,
 //   MapPin,
@@ -1074,9 +1074,9 @@
 //   LocateFixed,
 // } from "lucide-react";
 // import { useGeolocation } from "@/hooks/use-geolocation";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@barter/ui";
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-// import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@barter/ui";
 // import LocationPrompt from "@/components/locationprompt"; // ✅ imported
 
 // // --- DTO ---
@@ -1526,11 +1526,11 @@
 // import { useRouter } from "next/navigation";
 // import { ListingCard } from "@/components/listings/listing-card";
 // import { MapView } from "@/components/marketplace/map-view";
-// import { BottomNav } from "@/components/ui/bottom-nav";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Badge } from "@/components/ui/badge";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { BottomNav } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui";
 // import {
 //   Search,
 //   MapPin,
@@ -1544,9 +1544,9 @@
 //   LocateFixed,
 // } from "lucide-react";
 // import { useGeolocation } from "@/hooks/use-geolocation";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@barter/ui";
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-// import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@barter/ui";
 // import LocationPrompt from "@/components/locationprompt";
 
 // // --- DTO ---
@@ -2016,11 +2016,11 @@
 // import { useRouter } from "next/navigation";
 // import { ListingCard } from "@/components/listings/listing-card";
 // import { MapView } from "@/components/marketplace/map-view";
-// import { BottomNav } from "@/components/ui/bottom-nav";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Badge } from "@/components/ui/badge";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { BottomNav } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui";
 // import {
 //   Search,
 //   MapPin,
@@ -2034,9 +2034,9 @@
 //   LocateFixed,
 // } from "lucide-react";
 // import { useGeolocation } from "@/hooks/use-geolocation";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
+// import { Alert, AlertDescription } from "@barter/ui";
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-// import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@barter/ui";
 // import LocationPrompt from "@/components/locationprompt";
 
 // /* =======================
@@ -2331,8 +2331,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ListingCard } from "@/components/listings/listing-card";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { Input } from "@/components/ui/input";
+import { BottomNav } from "@barter/ui";
+import { Input } from "@barter/ui";
 import {
   Loader2,
   AlertCircle,
@@ -2344,7 +2344,7 @@ import {
   Building2,
 } from "lucide-react";
 import { useGeolocation } from "@/hooks/use-geolocation";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@barter/ui";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 
 /* =======================

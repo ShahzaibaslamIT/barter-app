@@ -2,10 +2,10 @@
 
 // import { useEffect, useState } from "react"
 // import { useRouter } from "next/navigation"
-// import { BottomNav } from "@/components/ui/bottom-nav"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Badge } from "@/components/ui/badge"
+// import { BottomNav } from "@barter/ui"
+// import { Card, CardContent } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { Badge } from "@barter/ui"
 // import { MessageCircle, Package, Wrench } from "lucide-react"
 
 // interface MessageThread {
@@ -197,10 +197,10 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { BottomNav } from "@/components/ui/bottom-nav"
-import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { BottomNav } from "@barter/ui"
+import { Card, CardContent } from "@barter/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+import { Badge } from "@barter/ui"
 import { MessageCircle, Package, Wrench } from "lucide-react"
 
 interface MessageThread {

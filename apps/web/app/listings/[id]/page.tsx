@@ -2,11 +2,11 @@
 
 // import { useEffect, useState } from "react"
 // import { useRouter, useParams } from "next/navigation"
-// import { Button } from "@/components/ui/button"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { BottomNav } from "@/components/ui/bottom-nav"
+// import { Button } from "@barter/ui"
+// import { Card, CardContent, CardHeader, CardTitle } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { BottomNav } from "@barter/ui"
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog"
 // import {
 //   ArrowLeft,
@@ -319,13 +319,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { Button } from "@barter/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@barter/ui";
+import { Badge } from "@barter/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+import { BottomNav } from "@barter/ui";
 import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@barter/ui";
 import {
   ArrowLeft,
   MapPin,

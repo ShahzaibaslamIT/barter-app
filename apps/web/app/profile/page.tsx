@@ -4,10 +4,10 @@
 // import { useRouter } from "next/navigation";
 // import { useSession, signOut } from "next-auth/react";
 
-// import { BottomNav } from "@/components/ui/bottom-nav";
-// import { Button } from "@/components/ui/button";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Badge } from "@/components/ui/badge";
+// import { BottomNav } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+// import { Badge } from "@barter/ui";
 // import { UserReviews } from "@/components/ratings/user-reviews";
 // import { RatingDisplay } from "@/components/ratings/rating-display";
 // import {
@@ -31,17 +31,17 @@
 //   DialogContent,
 //   DialogHeader,
 //   DialogTitle,
-// } from "@/components/ui/dialog";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import { useToast } from "@/hooks/use-toast";
+// } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Label } from "@barter/ui";
+// import { Textarea } from "@barter/ui";
+// import { useToast } from "@barter/ui";
 // import {
 //   Card,
 //   CardContent,
 //   CardHeader,
 //   CardTitle,
-// } from "@/components/ui/card";
+// } from "@barter/ui";
 
 // export default function ProfilePage() {
 //   const router = useRouter();
@@ -509,10 +509,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { BottomNav } from "@barter/ui";
+import { Button } from "@barter/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+import { Badge } from "@barter/ui";
 import { UserReviews } from "@/components/ratings/user-reviews";
 import { RatingDisplay } from "@/components/ratings/rating-display";
 import {
@@ -536,18 +536,18 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+} from "@barter/ui";
+import { Input } from "@barter/ui";
+import { Label } from "@barter/ui";
+import { Textarea } from "@barter/ui";
+import { useToast } from "@barter/ui";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@barter/ui";
 
 export default function ProfilePage() {
   useTermsGate();

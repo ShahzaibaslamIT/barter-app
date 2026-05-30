@@ -2,12 +2,12 @@
 
 // import type React from "react"
 // import { useState, useEffect, useRef } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { useToast } from "@/hooks/use-toast"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { Card, CardContent } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { useToast } from "@barter/ui"
 // import { Send, Package, Wrench } from "lucide-react"
 
 // interface Message {
@@ -329,12 +329,12 @@
 // "use client"
 
 // import { useState, useEffect, useRef } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { useToast } from "@/hooks/use-toast"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { Card, CardContent } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { useToast } from "@barter/ui"
 // import { Send, Package, Wrench } from "lucide-react"
 
 // interface Message {
@@ -628,12 +628,12 @@
 // "use client"
 
 // import { useState, useEffect, useRef } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Card, CardContent } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { useToast } from "@/hooks/use-toast"
+// import { Button } from "@barter/ui"
+// import { Input } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { Card, CardContent } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { useToast } from "@barter/ui"
 // import { Send, Package, Wrench } from "lucide-react"
 
 // interface Message {
@@ -942,12 +942,12 @@
 // "use client";
 
 // import { useState, useEffect, useRef } from "react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { useToast } from "@/hooks/use-toast";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+// import { Card, CardContent } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { useToast } from "@barter/ui";
 // import { Send, Package, Wrench } from "lucide-react";
 
 // interface Message {
@@ -1260,12 +1260,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@barter/ui";
+import { Input } from "@barter/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+import { Card, CardContent } from "@barter/ui";
+import { Badge } from "@barter/ui";
+import { useToast } from "@barter/ui";
 import { Send, Package, Wrench } from "lucide-react";
 
 interface Message {
