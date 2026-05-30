@@ -84,7 +84,7 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 - [x] T033 Added `"@barter/ui": "workspace:*"` to `apps/web/package.json`; added `@barter/ui` to `transpilePackages` in `next.config.mjs` (raw-TS package — see [[reference_transpile_workspace_packages]]).
 - [x] T034 Codemodded 31 app files: `@/components/ui/*` → `@barter/ui`. Also funnelled the toast store through the package — `@/hooks/use-toast` → `@barter/ui` (14 sites incl. the moved `toaster.tsx`→`./use-toast`) so `useToast()`/`toast()` and `<Toaster/>` share **one** module instance. Deleted now-dead `apps/web/hooks/use-toast.ts` + `use-mobile.ts`. Build green (2/2). Committed `3f9da2d`.
 - [~] T035 **Deferred to Phase 8 dep audit (T089/T090).** Most candidate deps (lucide-react, react-hook-form, etc.) still have direct `apps/web` consumers; hoisted linker tolerates the duplication meanwhile (same precedent as T013). Pruning now risks breakage for little gain.
-- [ ] T036 Deploy preview, smoke-test the user app UI for visual regressions (a dropped wrapper during the move shows as broken styling), then merge.
+- [x] T036 Pushed branch `006-extract-barter-ui` → Vercel preview. First preview surfaced a Tailwind-v4 content-scan gap: classes used only by moved components (BottomNav `fixed bottom-0`, toast viewport position) were purged → nav rendered inline, toast popped at top. Fixed in `4c3b8db` with `@source "../../../packages/ui/src/**/*.{ts,tsx}"` in `apps/web/app/globals.css` (see [[reference_transpile_workspace_packages]]). Preview re-verified (bottom nav pinned, toasts positioned, UI styled). Merged `--no-ff` → main (`9d2112e`); gamma redeploying.
 
 ### Extract `@barter/types`
 
