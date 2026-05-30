@@ -96,7 +96,7 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 - [x] T040 No change needed — `pnpm-workspace.yaml` already globs `packages/*`, so `@barter/types` is picked up automatically.
 - [~] T041 `pnpm install` ✅ and `pnpm build` ✅ (full workspace, 2/2 green). `pnpm lint` ❌ **pre-existing, not a 2d regression**: `next lint` reports "ESLint must be installed" — the `.eslintrc.cjs` files (T015) were scaffolded but `eslint` + the `next`/`@barter/config` plugins were never added as devDeps, so lint has never run in this monorepo. Does not affect deploys (`eslint.ignoreDuringBuilds: true`). **Follow-up**: wire up ESLint deps (own task / Phase 8 polish).
-- [ ] T042 Deploy preview of `apps/web`, smoke-test, then merge. (Zero runtime change this phase — `@barter/types` is empty — so this is a light confidence check, not a full regression sweep.)
+- [x] T042 Preview verified (credentials sign-in works; the Google "Continue with" `redirect_uri_mismatch` was preview-only — ephemeral domain not in the Google Console authorized redirect URIs, not a code issue). Merged `--no-ff` → main (`ac020d4`); gamma redeploying. **Phase 2 complete.**
 
 **Checkpoint**: `apps/web` lives in its new home; three shared packages exist and are consumed; `main` is deployable; no user-facing behavior change.
 
