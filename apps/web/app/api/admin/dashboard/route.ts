@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminFromRequest } from "@/lib/admin-auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 
 export async function GET(req: NextRequest) {
   const admin = getAdminFromRequest(req);

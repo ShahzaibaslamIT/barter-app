@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { signAdminToken, ADMIN_COOKIE, SESSION_MINUTES } from "@/lib/admin-auth";
 
 const MAX_FAILED = 5;

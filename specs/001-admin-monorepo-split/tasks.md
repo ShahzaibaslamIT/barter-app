@@ -65,15 +65,15 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Extract `@barter/db` (per ADR-0003)
 
-- [ ] T020 [P] Create `packages/db/package.json` declaring name `@barter/db`, `private: true`, `prisma` as devDependency, `@prisma/client` as dependency, and scripts: `"generate": "prisma generate"`, `"build": "prisma generate"`, `"migrate": "prisma migrate dev"`, `"postinstall": "prisma generate"`
-- [ ] T021 [P] Move `apps/web/prisma/schema.prisma` to `packages/db/prisma/schema.prisma` using `git mv`
-- [ ] T022 [P] Move `apps/web/prisma/migrations/` to `packages/db/prisma/migrations/` using `git mv`
-- [ ] T023 Move `apps/web/lib/prisma.ts` to `packages/db/src/client.ts`, preserving the singleton pattern
-- [ ] T024 Create `packages/db/src/index.ts` that re-exports `prisma` from `./client` and re-exports all Prisma model types and enums from `@prisma/client`
-- [ ] T025 Add `"@barter/db": "workspace:*"` to `apps/web/package.json`; remove `@prisma/client` and `prisma` from `apps/web/package.json` (they live in `@barter/db` now)
-- [ ] T026 Replace every `import { prisma } from "@/lib/prisma"` in `apps/web/` with `import { prisma } from "@barter/db"`. Affected files (from current `git status`): `app/api/auth/login/route.ts`, `app/api/auth/signup/route.ts`, `app/api/auth/verify-otp/route.ts`, `app/api/barter-offers/[id]/route.ts`, `app/api/barter-offers/route.ts`, `app/api/listings/[id]/route.ts`, `app/api/listings/nearby/route.ts`, `app/api/listings/route.ts`, `app/api/messages/route.ts`, plus the untracked `app/api/admin/*`, `app/api/auth/resend-otp/`, `app/api/listings/cities/`, `app/api/listings/mine/`, `app/api/notifications/`, `app/api/user/*` files and `lib/audit.ts`, `lib/get-server-user.ts`, `lib/user-status.ts`. Use a single codemod PR.
-- [ ] T027 Replace every direct `import { ... } from "@prisma/client"` for model types/enums in `apps/web/` with `import { ... } from "@barter/db"`. Single PR.
-- [ ] T028 Run `pnpm install`, then `pnpm db:generate`, then `pnpm --filter web build` from repo root. Build must succeed.
+- [x] T020 [P] Created `packages/db/package.json` (name `@barter/db`, private; `@prisma/client` dep, `prisma` devDep; scripts `generate`/`build`/`migrate`/`postinstall`). Also added `packages/db/tsconfig.json`.
+- [x] T021 [P] Moved `apps/web/prisma/schema.prisma` → `packages/db/prisma/schema.prisma` via `git mv` (rename preserved). Default generator (no custom `output`) → hoisted root `node_modules`, reachable from apps/web.
+- [x] T022 [P] Moved `apps/web/prisma/migrations/` (+ `seed.ts`) → `packages/db/prisma/` via `git mv`.
+- [x] T023 Moved `apps/web/lib/prisma.ts` → `packages/db/src/client.ts`; Neon keep-alive singleton preserved unchanged.
+- [x] T024 Created `packages/db/src/index.ts` — `export { prisma } from "./client"` + `export * from "@prisma/client"` (types, enums, Prisma namespace).
+- [x] T025 Added `"@barter/db": "workspace:*"` to `apps/web/package.json`; removed `@prisma/client` + `prisma` and the now-orphaned `prisma generate` postinstall (generation lives in `@barter/db`).
+- [x] T026 Codemodded all 42 `@/lib/prisma` imports → `@barter/db`. Zero remaining refs.
+- [x] T027 Codemodded active `@prisma/client` type/enum imports → `@barter/db`: `lib/auth.ts`, `lib/auth-options.ts`, `lib/admin-auth.ts`, `app/api/auth/signup/route.ts`, `app/api/admin/listings/[id]/route.ts`, plus `scripts/create-admin.ts` and `scripts/seed-user.mjs`. (`packages/db/prisma/seed.ts` keeps `@prisma/client` — it lives inside the db package.)
+- [x] T028 `pnpm install` (1m19s; `@barter/db` postinstall generated client v6.19.3 to hoisted root). `pnpm turbo run build --filter=web...` → **2/2 tasks green** (`@barter/db#build` then `web:build`). Committed `a84c187` on branch `005-extract-barter-db`.
 - [ ] T029 Deploy preview, smoke-test, then merge.
 
 ### Extract `@barter/ui` (per ADR-0001)

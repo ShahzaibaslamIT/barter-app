@@ -3,7 +3,7 @@
 // import { NextRequest, NextResponse } from "next/server";
 // import { getServerSession } from "next-auth";
 // import { authOptions } from "@/lib/auth-options"; // adjust path if needed
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 
 // export async function PATCH(req: NextRequest) {
 //   try {
@@ -67,7 +67,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { geocodeLocation } from "@/lib/geocode";
 
 export async function PATCH(req: NextRequest) {

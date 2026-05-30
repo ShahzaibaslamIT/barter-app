@@ -2,7 +2,7 @@
 
 // import { type NextRequest, NextResponse } from "next/server";
 // import { verifyPassword } from "@/lib/auth";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 // import { randomInt } from "crypto";
 // import { resend } from "@/lib/resend";
 
@@ -109,7 +109,7 @@ export const runtime = "nodejs";
 
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyPassword } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { randomInt } from "crypto";
 import { resend } from "@/lib/resend";
 import { sendOTP, maskPhone } from "@/lib/sms";

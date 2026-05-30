@@ -2,8 +2,8 @@
 
 // import { NextRequest, NextResponse } from "next/server";
 // import { hashPassword } from "@/lib/auth";
-// import { prisma } from "@/lib/prisma";
-// import { UserType } from "@prisma/client";
+// import { prisma } from "@barter/db";
+// import { UserType } from "@barter/db";
 // import { randomInt } from "crypto";
 // import { resend } from "@/lib/resend"; // ⬅️ make sure lib/resend.ts is created
 
@@ -115,8 +115,8 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { UserType } from "@prisma/client";
+import { prisma } from "@barter/db";
+import { UserType } from "@barter/db";
 import { randomInt } from "crypto";
 import { resend } from "@/lib/resend";
 import { sendOTP, maskPhone } from "@/lib/sms";

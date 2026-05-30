@@ -1,6 +1,6 @@
 // // app/api/messages/route.ts
 // import { type NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest, getAuthSession } from "@/lib/auth"
 
 // // 🔑 Unified auth resolver
@@ -83,7 +83,7 @@
 
 // app/api/messages/route.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { getUserFromRequest, getAuthSession } from "@/lib/auth";
 import { sendPushNotification } from "@/lib/send-notification";
 import { enforceUserStatus } from "@/lib/user-status";

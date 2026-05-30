@@ -1,6 +1,6 @@
 // // app/api/messages/thread/[id]/route.ts
 // import { type NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // export async function GET(
@@ -86,7 +86,7 @@
 
 // // app/api/messages/threads/[id]/route.ts
 // import { type NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest, getAuthSession } from "@/lib/auth"
 
 // // 🔑 Unified auth helper
@@ -234,7 +234,7 @@
 
 // app/api/messages/threads/[id]/route.ts
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { getUserFromRequest, getAuthSession } from "@/lib/auth";
 
 async function getAuthUser(request: NextRequest) {

@@ -1,9 +1,9 @@
 // // lib/auth-options.ts
 // import type { NextAuthOptions } from "next-auth";
 // import GoogleProvider from "next-auth/providers/google";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 // import { generateToken } from "@/lib/auth";
-// import { UserType } from "@prisma/client";
+// import { UserType } from "@barter/db";
 
 // export const authOptions: NextAuthOptions = {
 //   providers: [
@@ -114,9 +114,9 @@
 // // lib/auth-options.ts
 // import type { NextAuthOptions } from "next-auth";
 // import GoogleProvider from "next-auth/providers/google";
-// import { prisma } from "@/lib/prisma";
+// import { prisma } from "@barter/db";
 // import { generateToken } from "@/lib/auth";
-// import { UserType } from "@prisma/client";
+// import { UserType } from "@barter/db";
 // import { randomInt } from "crypto";
 // import { resend } from "@/lib/resend";
 
@@ -261,9 +261,9 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { generateToken } from "@/lib/auth";
-import { UserType } from "@prisma/client";
+import { UserType } from "@barter/db";
 import { randomInt } from "crypto";
 import { resend } from "@/lib/resend";
 import type { User } from "next-auth";

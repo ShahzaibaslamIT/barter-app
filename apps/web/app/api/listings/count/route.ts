@@ -1,5 +1,5 @@
 // app/api/listings/count/route.ts
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@barter/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {

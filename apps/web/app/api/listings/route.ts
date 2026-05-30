@@ -2,7 +2,7 @@
 // export const runtime = "nodejs"
 
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- GET (listings) -------------------
@@ -145,7 +145,7 @@
 // export const runtime = "nodejs"
 
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- GET (listings) -------------------
@@ -307,7 +307,7 @@
 export const runtime = "nodejs"
 
 import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@barter/db"
 import { getUserFromRequest } from "@/lib/auth"
 import { getServerUser } from "@/lib/get-server-user"
 import { enforceUserStatus } from "@/lib/user-status"
@@ -595,7 +595,7 @@ export async function OPTIONS() {
 // export const runtime = "nodejs"
 
 // import { NextRequest, NextResponse } from "next/server"
-// import { prisma } from "@/lib/prisma"
+// import { prisma } from "@barter/db"
 // import { getUserFromRequest } from "@/lib/auth"
 
 // // ------------------- GET (fetch listings) -------------------
