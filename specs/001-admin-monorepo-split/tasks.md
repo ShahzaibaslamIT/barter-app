@@ -110,9 +110,9 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 > Most of US4's work is folded into Phase 2 by technical dependency. This phase verifies the acceptance criteria and locks in the property going forward.
 
-- [ ] T043 [US4] Run `grep -r "model " --include="*.prisma" .` from repo root and confirm matches are confined to `packages/db/prisma/schema.prisma` (SC-010)
-- [ ] T044 [US4] Run `grep -r "from \"@prisma/client\"" apps/` and confirm zero matches — apps must import types from `@barter/db` only (ADR-0003)
-- [ ] T045 [US4] Execute the schema-edit-one-place workflow: add a temporary `// noop` comment-only change to `schema.prisma`, run `pnpm db:generate`, run `pnpm --filter web build`, confirm green, then revert.
+- [x] T043 [US4] Verified — all `model` declarations are confined to `packages/db/prisma/schema.prisma`; no `.prisma` model defs anywhere else (SC-010 holds).
+- [x] T044 [US4] Verified — `grep 'from "@prisma/client"' apps/` returns **zero** matches; apps import Prisma types from `@barter/db` only (ADR-0003 holds).
+- [x] T045 [US4] Ran the schema-edit-one-place workflow: appended a temporary `// noop` comment to `schema.prisma` → `pnpm db:generate` → `pnpm turbo run build --filter=web...` → **green with zero app edits** → reverted (schema clean). Single-source propagation confirmed.
 
 **Checkpoint**: US4 acceptance scenarios pass independently.
 
@@ -124,11 +124,11 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 **Independent Test**: From a clean clone, `pnpm install && pnpm dev` boots `apps/web` on `:3000` within ~60s of first compile (SC-003). At this point `apps/admin` does not yet exist — partial verification.
 
-- [ ] T046 [P] [US5] Add root `package.json` script `"dev:web": "turbo run dev --filter=web"`
-- [ ] T047 [P] [US5] Add root `package.json` script `"dev:admin": "turbo run dev --filter=admin"` (will start working once `apps/admin` exists in Phase 5)
-- [ ] T048 [US5] Update `turbo.json` `dev` task: `"cache": false, "persistent": true` so dev servers stay running and aren't cached
-- [ ] T049 [US5] Update `quickstart.md` if any concrete details diverged from what was drafted in Phase 1 design
-- [ ] T050 [US5] On a fresh clone, time `pnpm install && pnpm dev:web` from cold and record the time-to-first-served-page. Must be ≤60s (SC-003).
+- [x] T046 [P] [US5] Added root `"dev:web": "turbo run dev --filter=web"`. Dry-run confirms it scopes to the `web` package. Committed `4b3278b`.
+- [x] T047 [P] [US5] Added root `"dev:admin": "turbo run dev --filter=admin"`. Matches no package yet (expected — `apps/admin` arrives in Phase 5).
+- [x] T048 [US5] No change needed — `turbo.json` `dev` task already has `"cache": false, "persistent": true` (set in Phase 2a, T018).
+- [x] T049 [US5] No change needed — `quickstart.md` already documents `pnpm dev` / `dev:web` / `dev:admin` and ports 3000/3001 (drafted in Phase 1); the scripts added in T046/T047 now match it.
+- [~] T050 [US5] **Deferred to a clean environment.** The `dev:web` wiring is verified (dry-run → `web#dev`) and the Next dev boot itself was confirmed fast in the Phase 2a smoke test (T019). A true cold `pnpm install && pnpm dev:web` timing on this Windows box is dominated by the slow install (~tens of min on this network, [[feedback_pnpm_hoisted_linker]]), not the SC-003 boot-to-first-page metric; full timing belongs on a fresh clone (or in Phase 5 once `apps/admin` exists, to time both apps).
 
 **Checkpoint**: Single-command dev works for the user app; verification for both apps simultaneously completes in Phase 5 after `apps/admin` exists.
 
