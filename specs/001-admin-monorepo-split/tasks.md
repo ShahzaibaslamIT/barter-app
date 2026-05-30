@@ -198,6 +198,7 @@ Each of the following tasks is a separate PR. Each PR moves one admin feature, u
 - [ ] T079 [US2] Confirm DNS resolves and TLS handshake succeeds: `curl -I https://admin.<root-domain>` returns `HTTP/2 200` (or `307` if not logged in)
 - [ ] T080 [US2] Set `NEXTAUTH_URL` env var in the `barter-web` Vercel project to the user-app production URL (e.g. `https://www.<root-domain>`). Confirm `NEXTAUTH_URL` is **not** set in `barter-admin`.
 - [ ] T081 [US2] Verify acceptance scenarios from spec US2: admin host serves admin app; user-app host has no admin routes reachable; monitoring shows two distinct request streams.
+- [ ] T081b [US2] Remove the public "Admin Portal" button (`<Link href="/admin/login">`, the dark button at `apps/web/app/auth/page.tsx` ~lines 262–280, plus its now-unused `ShieldCheck` import if orphaned) from the user-facing sign-in page. Admin is reached at `admin.<root-domain>` now and should not be advertised on the public auth page. Pairs with T086's server-side `/admin/*` → subdomain redirect. (Deferred here intentionally per US6: removing it earlier would be a user-facing change during the byte-equivalent Phase 2.)
 
 **Checkpoint**: SC-009 holds. The admin panel has its own hostname.
 
