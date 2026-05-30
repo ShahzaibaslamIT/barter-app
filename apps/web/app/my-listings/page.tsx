@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ListingCard } from "@/components/listings/listing-card";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { Button } from "@/components/ui/button";
+import { BottomNav } from "@barter/ui";
+import { Button } from "@barter/ui";
 import { Loader2, Plus } from "lucide-react";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 

@@ -2,8 +2,8 @@
 
 // import { useState } from "react"
 // import { ListingForm } from "@/components/listings/listing-form"
-// import { Button } from "@/components/ui/button"
-// import { Card, CardContent } from "@/components/ui/card"
+// import { Button } from "@barter/ui"
+// import { Card, CardContent } from "@barter/ui"
 // import { Package, Wrench, ArrowLeft } from "lucide-react"
 // import { useRouter } from "next/navigation"
 
@@ -87,8 +87,8 @@
 
 import { useState } from "react"
 import { ListingForm } from "@/components/listings/listing-form"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@barter/ui"
+import { Card, CardContent } from "@barter/ui"
 import { Package, Wrench, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useTermsGate } from "@/hooks/use-terms-gate"

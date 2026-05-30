@@ -2,12 +2,12 @@
 
 // import { useState, useEffect } from "react"
 // import { useRouter } from "next/navigation"
-// import { Card, CardContent, CardHeader } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import { Card, CardContent, CardHeader } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
 // import { RatingDialog } from "@/components/ratings/rating-dialog"
-// import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@barter/ui"
 // import {
 //   Package,
 //   Wrench,
@@ -432,12 +432,12 @@
 
 // import { useState, useEffect } from "react";
 // import { useRouter } from "next/navigation";
-// import { Card, CardContent, CardHeader } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Badge } from "@/components/ui/badge";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Card, CardContent, CardHeader } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
 // import { RatingDialog } from "@/components/ratings/rating-dialog";
-// import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@barter/ui";
 // import {
 //   Package,
 //   Wrench,
@@ -866,12 +866,12 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardHeader } from "@barter/ui"
+import { Button } from "@barter/ui"
+import { Badge } from "@barter/ui"
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
 import { RatingDialog } from "@/components/ratings/rating-dialog"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@barter/ui"
 import {
   Package,
   Wrench,

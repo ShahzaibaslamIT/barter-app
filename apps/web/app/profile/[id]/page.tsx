@@ -2,11 +2,11 @@
 
 // import { useEffect, useState } from "react"
 // import { useParams, useRouter } from "next/navigation"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { BottomNav } from "@/components/ui/bottom-nav"
+// import { Card, CardContent, CardHeader, CardTitle } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { BottomNav } from "@barter/ui"
 // import { RatingDisplay } from "@/components/ratings/rating-display"
 // import { ArrowLeft, MapPin, Package, Wrench } from "lucide-react"
 
@@ -158,11 +158,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import { Card, CardContent } from "@barter/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
+import { Badge } from "@barter/ui";
+import { Button } from "@barter/ui";
+import { BottomNav } from "@barter/ui";
 import { RatingDisplay } from "@/components/ratings/rating-display";
 import { ArrowLeft, Package, Wrench } from "lucide-react";
 

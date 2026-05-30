@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Input } from "@barter/ui";
+import { Textarea } from "@barter/ui";
+import { Button } from "@barter/ui";
 
 interface EditableListing {
   item_id: number;

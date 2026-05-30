@@ -2,8 +2,8 @@
 
 // import { use, useEffect, useState } from "react"
 // import { useRouter } from "next/navigation"
-// import { Button } from "@/components/ui/button"
-// import { BottomNav } from "@/components/ui/bottom-nav"
+// import { Button } from "@barter/ui"
+// import { BottomNav } from "@barter/ui"
 // import { ChatInterface } from "@/components/messages/chat-interface"
 // import { ArrowLeft } from "lucide-react"
 
@@ -67,8 +67,8 @@
 import { use, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { BottomNav } from "@/components/ui/bottom-nav"
+import { Button } from "@barter/ui"
+import { BottomNav } from "@barter/ui"
 import { ChatInterface } from "@/components/messages/chat-interface"
 import { ArrowLeft } from "lucide-react"
 

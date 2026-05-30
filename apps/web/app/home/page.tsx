@@ -3,9 +3,9 @@
 // import { useEffect, useState } from "react";
 // import { useRouter, useSearchParams } from "next/navigation";
 // import { ListingCard } from "@/components/listings/listing-card";
-// import { BottomNav } from "@/components/ui/bottom-nav";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
+// import { BottomNav } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
 // import {
 //   Plus,
 //   Search,
@@ -15,7 +15,7 @@
 //   Clock,
 // } from "lucide-react";
 // import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-// import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@barter/ui";
 // import "leaflet/dist/leaflet.css";
 
 // /* =========================
@@ -318,9 +318,9 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ListingCard } from "@/components/listings/listing-card";
-import { BottomNav } from "@/components/ui/bottom-nav";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { BottomNav } from "@barter/ui";
+import { Button } from "@barter/ui";
+import { Input } from "@barter/ui";
 import {
   Plus,
   Search,
@@ -328,7 +328,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@barter/ui";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 
 /* =========================

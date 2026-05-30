@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@barter/ui";
+import { Input } from "@barter/ui";
 
 export default function VerifyPage() {
   const params = useSearchParams();

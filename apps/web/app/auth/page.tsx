@@ -7,7 +7,7 @@
 // // import { useRouter } from "next/navigation";
 // // import { signIn } from "next-auth/react";
 // // import { AuthForm } from "@/components/auth/auth-form";
-// // import { Button } from "@/components/ui/button";
+// // import { Button } from "@barter/ui";
 
 // // export default function AuthPage() {
 // //   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -78,7 +78,7 @@
 // import { useRouter } from "next/navigation";
 // import { signIn } from "next-auth/react";
 // import { AuthForm } from "@/components/auth/auth-form";
-// import { Button } from "@/components/ui/button";
+// import { Button } from "@barter/ui";
 
 // export default function AuthPage() {
 //   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -139,7 +139,7 @@ import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 
 import { AuthForm } from "@/components/auth/auth-form";
-import { Button } from "@/components/ui/button";
+import { Button } from "@barter/ui";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";

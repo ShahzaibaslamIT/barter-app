@@ -3,10 +3,10 @@
 // import type React from "react"
 
 // import { useState } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Textarea } from "@/components/ui/textarea"
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-// import { useToast } from "@/hooks/use-toast"
+// import { Button } from "@barter/ui"
+// import { Textarea } from "@barter/ui"
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@barter/ui"
+// import { useToast } from "@barter/ui"
 // import { Star } from "lucide-react"
 
 // interface RatingDialogProps {
@@ -175,16 +175,16 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@barter/ui"
+import { Textarea } from "@barter/ui"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+} from "@barter/ui"
+import { useToast } from "@barter/ui"
 import { Star } from "lucide-react"
 
 interface RatingDialogProps {

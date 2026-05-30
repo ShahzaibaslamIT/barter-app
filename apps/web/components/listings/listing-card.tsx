@@ -1,9 +1,9 @@
 // "use client"
 // import { useState } from "react"
-// import { Card, CardContent, CardFooter } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import { Card, CardContent, CardFooter } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
 // import { MapPin, Star, Package, Wrench, Trash2 } from "lucide-react"
 
 // interface Listing {
@@ -177,10 +177,10 @@
 // "use client"
 
 // import { useEffect, useState } from "react"
-// import { Card, CardContent, CardFooter } from "@/components/ui/card"
-// import { Badge } from "@/components/ui/badge"
-// import { Button } from "@/components/ui/button"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import { Card, CardContent, CardFooter } from "@barter/ui"
+// import { Badge } from "@barter/ui"
+// import { Button } from "@barter/ui"
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
 // import { MapPin, Star, Package, Wrench, Trash2 } from "lucide-react"
 
 // interface Listing {
@@ -390,10 +390,10 @@
 // "use client";
 
 // import { useEffect, useState } from "react";
-// import { Card, CardContent, CardFooter } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Card, CardContent, CardFooter } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
 // import { MapPin, Star, Package, Wrench, Trash2 } from "lucide-react";
 
 // interface Listing {
@@ -620,10 +620,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardFooter } from "@barter/ui";
+import { Badge } from "@barter/ui";
+import { Button } from "@barter/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
 import { MapPin, Star, Package, Wrench, Trash2, Pencil } from "lucide-react";
 
 interface Listing {
@@ -917,10 +917,10 @@ export function ListingCard({
 // "use client";
 
 // import { useEffect, useState } from "react";
-// import { Card, CardContent, CardFooter } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Button } from "@/components/ui/button";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Card, CardContent, CardFooter } from "@barter/ui";
+// import { Badge } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui";
 // import { MapPin, Star, Package, Wrench, Trash2, Pencil, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 
 // interface Listing {

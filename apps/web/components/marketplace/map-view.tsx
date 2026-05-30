@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@barter/ui"
+import { Button } from "@barter/ui"
+import { Badge } from "@barter/ui"
 import { MapPin, Package, Wrench } from "lucide-react"
 
 // ✅ Import the entire Map component dynamically

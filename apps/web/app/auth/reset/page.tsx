@@ -1,10 +1,10 @@
 // "use client";
 
 // import { useState } from "react";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Button } from "@/components/ui/button";
-// import { useToast } from "@/hooks/use-toast";
+// import { Input } from "@barter/ui";
+// import { Label } from "@barter/ui";
+// import { Button } from "@barter/ui";
+// import { useToast } from "@barter/ui";
 // import { useRouter, useSearchParams } from "next/navigation";
 
 // export default function ResetPasswordPage() {
@@ -94,10 +94,10 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@barter/ui";
+import { Label } from "@barter/ui";
+import { Button } from "@barter/ui";
+import { useToast } from "@barter/ui";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ResetPasswordPage() {

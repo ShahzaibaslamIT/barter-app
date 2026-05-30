@@ -3,9 +3,9 @@
 // import { useState } from "react";
 // import { useRouter } from "next/navigation";
 
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
+// import { Button } from "@barter/ui";
+// import { Input } from "@barter/ui";
+// import { Label } from "@barter/ui";
 
 // export default function CompleteProfilePage() {
 //   const router = useRouter();
@@ -158,9 +158,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@barter/ui";
+import { Input } from "@barter/ui";
+import { Label } from "@barter/ui";
 
 export default function CompleteProfilePage() {
   const router = useRouter();

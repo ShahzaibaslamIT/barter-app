@@ -1,6 +1,6 @@
 // // components/LocationPrompt.tsx
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Button } from "@barter/ui";
+// import { Card, CardContent, CardHeader, CardTitle } from "@barter/ui";
 // import { useState } from "react";
 // import { useGeolocation } from "@/hooks/use-geolocation";
 
@@ -50,8 +50,8 @@
 
 // "use client";
 
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Button } from "@barter/ui";
+// import { Card, CardContent, CardHeader, CardTitle } from "@barter/ui";
 // import { useState } from "react";
 // import { useGeolocation } from "@/hooks/use-geolocation";
 // import { LocateFixed } from "lucide-react";
@@ -117,13 +117,13 @@
 
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@barter/ui";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@barter/ui";
 import { useState } from "react";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { LocateFixed, MapPinOff } from "lucide-react";
