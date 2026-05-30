@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Tailwind v4 auto-scans only this app's tree. The shared UI kit lives in a
+   separate workspace package, so its class names (e.g. BottomNav's `fixed
+   bottom-0`, the toast viewport position) must be registered explicitly or
+   they get purged — components then render unstyled/mispositioned. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
