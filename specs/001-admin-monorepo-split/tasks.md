@@ -74,7 +74,7 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 - [x] T026 Codemodded all 42 `@/lib/prisma` imports → `@barter/db`. Zero remaining refs.
 - [x] T027 Codemodded active `@prisma/client` type/enum imports → `@barter/db`: `lib/auth.ts`, `lib/auth-options.ts`, `lib/admin-auth.ts`, `app/api/auth/signup/route.ts`, `app/api/admin/listings/[id]/route.ts`, plus `scripts/create-admin.ts` and `scripts/seed-user.mjs`. (`packages/db/prisma/seed.ts` keeps `@prisma/client` — it lives inside the db package.)
 - [x] T028 `pnpm install` (1m19s; `@barter/db` postinstall generated client v6.19.3 to hoisted root). `pnpm turbo run build --filter=web...` → **2/2 tasks green** (`@barter/db#build` then `web:build`). Committed `a84c187` on branch `005-extract-barter-db`.
-- [ ] T029 Deploy preview, smoke-test, then merge.
+- [x] T029 Pushed branch `005-extract-barter-db` → Vercel preview. First preview 500'd on sign-in (Next copied @barter/db's raw `.ts` into the function uncompiled); fixed in `b6eb624` with `transpilePackages: ["@barter/db"]` + `outputFileTracingRoot` (repo root, for the hoisted Prisma engine). Preview re-verified (sign-in, discover, listing, offer). Merged `--no-ff` → main (`6d5cf70`); gamma redeploying.
 
 ### Extract `@barter/ui` (per ADR-0001)
 
