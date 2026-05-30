@@ -88,15 +88,15 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Extract `@barter/types`
 
-- [ ] T037 [P] Create `packages/types/package.json` declaring name `@barter/types`, `private: true`, no runtime dependencies
-- [ ] T038 [P] Create `packages/types/src/index.ts`. Move type-only declarations that are cross-cutting (DTOs, non-Prisma enums) here. **Initial content**: empty index — populate as cross-app types are identified during US1.
-- [ ] T039 Add `"@barter/types": "workspace:*"` to `apps/web/package.json`
+- [x] T037 [P] Created `packages/types/package.json` (`@barter/types`, private, no runtime deps) + `packages/types/tsconfig.json`.
+- [x] T038 [P] Created `packages/types/src/index.ts` — intentionally empty (`export {}` placeholder + guidance comment). Populate with cross-app DTOs / non-Prisma enums during US1; Prisma model types stay in `@barter/db`.
+- [x] T039 Added `"@barter/types": "workspace:*"` to `apps/web/package.json`. No codemod / no `transpilePackages` (nothing imports it yet; ships no runtime code). Committed `d35ba3a`.
 
 ### Cleanup and verification
 
-- [ ] T040 Update `pnpm-workspace.yaml` if any glob needs adjustment now that real packages exist
-- [ ] T041 Run `pnpm install`, `pnpm build`, `pnpm lint` from repo root. All must succeed.
-- [ ] T042 Deploy preview of `apps/web` and smoke-test the full user-app flow end-to-end. Merge only after production-equivalent verification.
+- [x] T040 No change needed — `pnpm-workspace.yaml` already globs `packages/*`, so `@barter/types` is picked up automatically.
+- [~] T041 `pnpm install` ✅ and `pnpm build` ✅ (full workspace, 2/2 green). `pnpm lint` ❌ **pre-existing, not a 2d regression**: `next lint` reports "ESLint must be installed" — the `.eslintrc.cjs` files (T015) were scaffolded but `eslint` + the `next`/`@barter/config` plugins were never added as devDeps, so lint has never run in this monorepo. Does not affect deploys (`eslint.ignoreDuringBuilds: true`). **Follow-up**: wire up ESLint deps (own task / Phase 8 polish).
+- [ ] T042 Deploy preview of `apps/web`, smoke-test, then merge. (Zero runtime change this phase — `@barter/types` is empty — so this is a light confidence check, not a full regression sweep.)
 
 **Checkpoint**: `apps/web` lives in its new home; three shared packages exist and are consumed; `main` is deployable; no user-facing behavior change.
 
