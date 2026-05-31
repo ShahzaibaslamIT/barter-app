@@ -142,14 +142,14 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Stand up the admin app skeleton
 
-- [ ] T051 [US1] Create `apps/admin/package.json` declaring name `admin`, `private: true`, dependencies: `next`, `react`, `react-dom`, `jsonwebtoken`, `@types/jsonwebtoken`, plus `"@barter/db": "workspace:*"`, `"@barter/ui": "workspace:*"`, `"@barter/types": "workspace:*"`, `"@barter/config": "workspace:*"`. Set `"dev": "next dev -p 3001"`.
-- [ ] T052 [P] [US1] Create `apps/admin/next.config.mjs` (minimal — image/eslint config copied from `apps/web/next.config.mjs` and trimmed)
-- [ ] T053 [P] [US1] Create `apps/admin/tsconfig.json` extending `@barter/config/tsconfig.base.json` with `paths: { "@/*": ["./*"] }`
-- [ ] T054 [P] [US1] Create `apps/admin/.eslintrc.cjs` extending `@barter/config/eslint/base`
-- [ ] T055 [P] [US1] Create `apps/admin/tailwind.config.ts` declaring `presets: [require('@barter/config/tailwind/base')]` and admin-specific `content` paths
-- [ ] T056 [P] [US1] Create `apps/admin/postcss.config.mjs` mirroring `apps/web/postcss.config.mjs`
-- [ ] T057 [US1] Create `apps/admin/app/layout.tsx` as a minimal root layout (no providers; admin app has no NotificationProvider, TermsGate, or NextAuth session provider)
-- [ ] T058 [US1] Create `apps/admin/app/page.tsx` that redirects to `/dashboard` (or `/login` if no admin session — final logic lands in T072)
+- [x] T051 [US1] Created `apps/admin/package.json` (name `admin`, private, `dev: next dev -p 3001`; deps `next`/`react`/`react-dom`/`jsonwebtoken` + four `@barter/*` workspace deps + `geist`; `@types/jsonwebtoken` etc. as devDeps).
+- [x] T052 [P] [US1] Created `apps/admin/next.config.mjs` — trimmed from web (images unoptimized, eslint/ts ignore-on-build) **plus** `transpilePackages: ["@barter/db","@barter/ui"]` + `outputFileTracingRoot` (repo root) baked in from the start per the 2b/2c runtime lessons ([[reference_transpile_workspace_packages]]).
+- [x] T053 [P] [US1] Created `apps/admin/tsconfig.json` (extends `@barter/config/tsconfig.base.json`, `@/*` alias, Next plugin). (`allowJs` auto-added by `next build`.)
+- [x] T054 [P] [US1] Created `apps/admin/.eslintrc.cjs` (`root:true`, extends `@barter/config/eslint/base`).
+- [~] T055 [P] [US1] **N/A — Tailwind v4 CSS-first.** No `tailwind.config.ts`. Instead created `apps/admin/app/globals.css` with the theme tokens (copied from web) + `@source "../../../packages/ui/src/**/*.{ts,tsx}"` so `@barter/ui` classes aren't purged in the admin app.
+- [x] T056 [P] [US1] Created `apps/admin/postcss.config.mjs` (mirrors web — `@tailwindcss/postcss`).
+- [x] T057 [US1] Created `apps/admin/app/layout.tsx` — minimal root layout, fonts + globals, **no providers** (no NextAuth session, NotificationProvider, SW, or StatusBanner).
+- [x] T058 [US1] Created `apps/admin/app/page.tsx` → `redirect("/login")` (full authed-vs-login logic lands in T074). **Skeleton builds green** (`turbo run build --filter=admin...`, 2/2); committed `b78537f` on `009-admin-app-skeleton`.
 
 ### Move admin login + auth (the smallest deployable admin feature)
 
