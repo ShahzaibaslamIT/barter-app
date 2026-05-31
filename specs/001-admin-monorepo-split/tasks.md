@@ -183,8 +183,8 @@ Each of the following tasks is a separate PR. Each PR moves one admin feature, u
 
 ### Verify per-app deploy isolation
 
-- [ ] T075 [US1] Make a trivial whitespace-only edit inside `apps/admin/app/dashboard/page.tsx`, push to a branch, open a PR. Verify in the PR's check list that only `barter-admin` reports a build status; `barter-web` reports "skipped by turbo-ignore".
-- [ ] T076 [US1] Reverse: trivial whitespace-only edit inside `apps/web/app/discover/page.tsx`. Verify only `barter-web` builds.
+- [x] T075 [US1] **Admin-only change isolates.** Branch `016-admin-isolation-test` (comment in `apps/admin/.../dashboard/page.tsx`): `barter-admin` built the preview, `barter-app` **skipped** (not in its Active Branches). Verified via Vercel's built-in Skip-Deployments (the `turbo-ignore` deprecation replacement). Test branch discarded.
+- [x] T076 [US1] **Web-only change isolates.** Branch `015-web-isolation-test` (comment in `apps/web/app/discover/page.tsx`): `barter-app` built the preview, `barter-admin` **skipped**. Test branch discarded. **→ SC-001 + SC-002 hold: the two apps deploy independently. Phase 5 MVP achieved.** (Note: both projects needed the Skip-Deployments toggle enabled; `barter-app`'s was enabled after the first admin merges, so those show stale pre-toggle web builds — harmless.)
 
 **Checkpoint**: Admin app deploys independently. SC-001 and SC-002 hold. This is the **MVP** — the most important user-visible value (operational separation) has landed.
 
