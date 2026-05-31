@@ -142,23 +142,25 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Stand up the admin app skeleton
 
-- [ ] T051 [US1] Create `apps/admin/package.json` declaring name `admin`, `private: true`, dependencies: `next`, `react`, `react-dom`, `jsonwebtoken`, `@types/jsonwebtoken`, plus `"@barter/db": "workspace:*"`, `"@barter/ui": "workspace:*"`, `"@barter/types": "workspace:*"`, `"@barter/config": "workspace:*"`. Set `"dev": "next dev -p 3001"`.
-- [ ] T052 [P] [US1] Create `apps/admin/next.config.mjs` (minimal — image/eslint config copied from `apps/web/next.config.mjs` and trimmed)
-- [ ] T053 [P] [US1] Create `apps/admin/tsconfig.json` extending `@barter/config/tsconfig.base.json` with `paths: { "@/*": ["./*"] }`
-- [ ] T054 [P] [US1] Create `apps/admin/.eslintrc.cjs` extending `@barter/config/eslint/base`
-- [ ] T055 [P] [US1] Create `apps/admin/tailwind.config.ts` declaring `presets: [require('@barter/config/tailwind/base')]` and admin-specific `content` paths
-- [ ] T056 [P] [US1] Create `apps/admin/postcss.config.mjs` mirroring `apps/web/postcss.config.mjs`
-- [ ] T057 [US1] Create `apps/admin/app/layout.tsx` as a minimal root layout (no providers; admin app has no NotificationProvider, TermsGate, or NextAuth session provider)
-- [ ] T058 [US1] Create `apps/admin/app/page.tsx` that redirects to `/dashboard` (or `/login` if no admin session — final logic lands in T072)
+- [x] T051 [US1] Created `apps/admin/package.json` (name `admin`, private, `dev: next dev -p 3001`; deps `next`/`react`/`react-dom`/`jsonwebtoken` + four `@barter/*` workspace deps + `geist`; `@types/jsonwebtoken` etc. as devDeps).
+- [x] T052 [P] [US1] Created `apps/admin/next.config.mjs` — trimmed from web (images unoptimized, eslint/ts ignore-on-build) **plus** `transpilePackages: ["@barter/db","@barter/ui"]` + `outputFileTracingRoot` (repo root) baked in from the start per the 2b/2c runtime lessons ([[reference_transpile_workspace_packages]]).
+- [x] T053 [P] [US1] Created `apps/admin/tsconfig.json` (extends `@barter/config/tsconfig.base.json`, `@/*` alias, Next plugin). (`allowJs` auto-added by `next build`.)
+- [x] T054 [P] [US1] Created `apps/admin/.eslintrc.cjs` (`root:true`, extends `@barter/config/eslint/base`).
+- [~] T055 [P] [US1] **N/A — Tailwind v4 CSS-first.** No `tailwind.config.ts`. Instead created `apps/admin/app/globals.css` with the theme tokens (copied from web) + `@source "../../../packages/ui/src/**/*.{ts,tsx}"` so `@barter/ui` classes aren't purged in the admin app.
+- [x] T056 [P] [US1] Created `apps/admin/postcss.config.mjs` (mirrors web — `@tailwindcss/postcss`).
+- [x] T057 [US1] Created `apps/admin/app/layout.tsx` — minimal root layout, fonts + globals, **no providers** (no NextAuth session, NotificationProvider, SW, or StatusBanner).
+- [x] T058 [US1] Created `apps/admin/app/page.tsx` → `redirect("/login")` (full authed-vs-login logic lands in T074). **Skeleton builds green** (`turbo run build --filter=admin...`, 2/2); committed `b78537f` on `009-admin-app-skeleton`.
 
 ### Move admin login + auth (the smallest deployable admin feature)
 
-- [ ] T059 [US1] Move `apps/web/app/admin/layout.tsx` → `apps/admin/app/layout.tsx` (merge with T057); move `apps/web/app/admin/AdminSidebar.tsx` → `apps/admin/components/AdminSidebar.tsx`
-- [ ] T060 [US1] Move `apps/web/app/admin/login/` → `apps/admin/app/login/`
-- [ ] T061 [US1] Move `apps/web/lib/admin-auth.ts` → `apps/admin/lib/admin-auth.ts`
-- [ ] T062 [US1] Move `apps/web/app/api/admin/auth/` → `apps/admin/app/api/auth/` (URL prefix `/admin/` is dropped on the admin host per `contracts/route-ownership.md`)
-- [ ] T063 [US1] Update every fetch call inside the moved admin login UI from `fetch('/api/admin/auth/...')` to `fetch('/api/auth/...')`. Files: `apps/admin/app/login/page.tsx` and any client component under the moved login tree.
-- [ ] T064 [US1] Run `pnpm --filter admin build` from repo root. Build must succeed.
+> **Strategy: keep-old-until-verified (user choice).** Stage 2 **copies** (does not `git mv`) login/auth into `apps/admin`, leaving `apps/web/app/admin/*` fully intact so the current `/admin` panel keeps working throughout migration. The `apps/web` admin tree is removed in one final cleanup PR once `barter-admin` is verified.
+
+- [~] T059 [US1] **Copied** `AdminSidebar.tsx` → `apps/admin/components/AdminSidebar.tsx` (nav hrefs / logout fetch / login redirect de-prefixed). The web admin `layout.tsx` guard (`x-pathname`-based) was **not** moved — admin-app root layout stays the minimal T057 one; the protected layout (AdminSidebar + `getAdminFromCookies` guard) is created in stage 4 when the authed pages land. (`apps/web` layout untouched.)
+- [~] T060 [US1] **Copied** `apps/web/app/admin/login/page.tsx` → `apps/admin/app/login/page.tsx` (web original left in place).
+- [~] T061 [US1] **Copied** `apps/web/lib/admin-auth.ts` → `apps/admin/lib/admin-auth.ts` verbatim (already imports `@barter/db`; web original left in place).
+- [~] T062 [US1] **Copied** `apps/web/app/api/admin/auth/{login,logout,me}` → `apps/admin/app/api/auth/{login,logout,me}` (`/admin` URL prefix dropped on the admin host). web originals left in place.
+- [x] T063 [US1] Updated the copied login UI: `fetch('/api/admin/auth/login')` → `fetch('/api/auth/login')`, post-login redirect `/admin/dashboard` → `/dashboard`. (AdminSidebar logout/nav also de-prefixed.)
+- [x] T064 [US1] `pnpm turbo run build --filter=admin...` green — admin routes: `/`, `/login`, `/api/auth/{login,logout,me}`. Added `bcryptjs` + `lucide-react` to admin deps. Committed `359d8ef`. **Cleanup note:** the `[~]` copies above become true moves when `apps/web/app/admin/*` + `lib/admin-auth.ts` + `app/api/admin/auth/*` are deleted in the final Phase 5 cleanup (after `barter-admin` is verified).
 
 ### Stand up the admin Vercel project
 
