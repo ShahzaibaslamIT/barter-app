@@ -176,7 +176,7 @@ Each of the following tasks is a separate PR. Each PR moves one admin feature, u
 
 - [x] T069 [US1] Migrated **users** (copy). UI → `app/(protected)/users/{page,[id]/page}.tsx` (under the guarded layout; `/admin/`→`/`). API → `app/api/users/{route,[id]/route}.ts` (verbatim). Also copied `lib/audit.ts` early — `users/[id]` route imports `createAuditLog` (originally bundled with T072). admin build green (+`/users`, `/users/[id]`, `/api/users`, `/api/users/[id]`). Branch `011-admin-users`, pending preview verify. `apps/web` untouched.
 - [x] T070 [US1] Migrated **listings** (copy). UI → `app/(protected)/listings/{page,[id]/page}.tsx` (`/admin/`→`/`). API → `app/api/listings/{route,[id]/route}.ts` (verbatim; deps admin-auth/audit/`@barter/db` + `ModerationStatus` already present). admin build green. Branch `012-admin-listings`, pending preview verify. `apps/web` untouched.
-- [ ] T071 [US1] Migrate **reports**: same pattern.
+- [x] T071 [US1] Migrated **reports** (copy). UI → `app/(protected)/reports/page.tsx` (`/admin/`→`/`). API → `app/api/reports/{route,[id]/route}.ts` (verbatim). admin build green. Branch `013-admin-reports`, pending preview verify. `apps/web` untouched.
 - [ ] T072 [US1] Migrate **audit-logs**: same pattern; also move `apps/web/lib/audit.ts` → `apps/admin/lib/audit.ts`.
 - [x] T073 [US1] Migrated **dashboard** (done FIRST, intentionally — so the post-login 404 becomes the real home before the other features). Copied `dashboard/page.tsx` → `app/(protected)/dashboard/page.tsx` (de-prefixed) + `app/api/admin/dashboard/route.ts` → `app/api/dashboard/route.ts` (verbatim). Created `app/(protected)/layout.tsx` (AdminSidebar + `getAdminFromCookies` guard — completes the deferred guard part of T059; `/login` stays public outside the group). admin build green. Branch `010-admin-dashboard`, commit pending preview verify.
 - [x] T074 [US1] Finalised `apps/admin/app/page.tsx` — `getAdminFromCookies()` → `/dashboard` if authed else `/login`. (Done early alongside the dashboard; safe since both targets now exist.)
@@ -241,7 +241,11 @@ Each of the following tasks is a separate PR. Each PR moves one admin feature, u
 - [ ] T098 Run the `quickstart.md` setup end-to-end on a fresh clone: `pnpm install && cp .env.example .env && pnpm dev` boots both apps; admin login works; user signup works. Update `quickstart.md` if any step needs correction.
 - [ ] T099 Create a git tag `migration/admin-monorepo-split-complete` on the merge commit that finishes Phase 8 and reference it in the feature's final PR description for traceability.
 
-**Checkpoint**: Refactor complete. Open issues file: (1) FR-015 redirect→404 cutover date, (2) `lib/rate-limit.ts` shared vs duplicated decision (deferred from Phase 2 — audit in a follow-up if it has both admin and web consumers).
+**Checkpoint**: Refactor complete. Open issues file:
+1. FR-015 redirect→404 cutover date.
+2. `lib/rate-limit.ts` shared vs duplicated decision (deferred from Phase 2 — audit in a follow-up if it has both admin and web consumers).
+3. **ESLint never wired up** — `.eslintrc.cjs` scaffolded (T015) but `eslint` + plugins not installed, so `pnpm lint` fails ("ESLint must be installed"). Doesn't affect deploys (`eslint.ignoreDuringBuilds`). Add eslint deps so the lint gate works.
+4. **Listing moderation gate is vestigial (product decision, NOT a migration task).** New listings are created `moderation_status=@default(approved)` + `is_active:true`, and the public `/api/listings` query filters on `is_active` only — it never checks `moderation_status`. So listings publish immediately (no pre-publish approval), the admin "Pending Review" queue is always ~empty, and Approve/Reject only matters as a *post-publish takedown* (reject/remove/blacklist set `is_active:false`; approve sets it back true). Decide later: (a) implement a real pre-publish gate (create as `pending` + marketplace filters `approved`), or (b) remove the vestigial "Pending Review" UI and keep only takedown actions. ADR-worthy: `/sp.adr listing-moderation-gate`. The migration preserves current behavior unchanged.
 
 ---
 
