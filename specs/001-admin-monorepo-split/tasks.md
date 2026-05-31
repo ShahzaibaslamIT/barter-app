@@ -174,7 +174,7 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 Each of the following tasks is a separate PR. Each PR moves one admin feature, updates fetch sites, deploys a preview, smoke-tests, then merges. **Strategy: keep-old-until-verified** — these **copy** into `apps/admin` (de-prefixing `/admin/` → `/`); the `apps/web/app/admin/*` + `apps/web/app/api/admin/*` originals are removed in one final cleanup PR once `barter-admin` is fully verified.
 
-- [ ] T069 [US1] Migrate **users**: move `apps/web/app/admin/users/` → `apps/admin/app/users/`; move `apps/web/app/api/admin/users/` → `apps/admin/app/api/users/`; update fetch sites from `/api/admin/users` → `/api/users` inside the moved tree; deploy preview; smoke-test; delete from `apps/web`; merge.
+- [x] T069 [US1] Migrated **users** (copy). UI → `app/(protected)/users/{page,[id]/page}.tsx` (under the guarded layout; `/admin/`→`/`). API → `app/api/users/{route,[id]/route}.ts` (verbatim). Also copied `lib/audit.ts` early — `users/[id]` route imports `createAuditLog` (originally bundled with T072). admin build green (+`/users`, `/users/[id]`, `/api/users`, `/api/users/[id]`). Branch `011-admin-users`, pending preview verify. `apps/web` untouched.
 - [ ] T070 [US1] Migrate **listings**: same pattern for `apps/web/app/admin/listings/` and `apps/web/app/api/admin/listings/`.
 - [ ] T071 [US1] Migrate **reports**: same pattern.
 - [ ] T072 [US1] Migrate **audit-logs**: same pattern; also move `apps/web/lib/audit.ts` → `apps/admin/lib/audit.ts`.
