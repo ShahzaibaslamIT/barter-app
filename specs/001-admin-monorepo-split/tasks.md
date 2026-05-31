@@ -167,18 +167,19 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 - [ ] T065 [US1] Create a new Vercel project `barter-admin` linked to the same Git repo. **Root Directory**: `apps/admin`. **Build Command**: `cd ../.. && turbo run build --filter=admin...`. **Install Command**: `cd ../.. && pnpm install --frozen-lockfile`. **Environment variables**: `DATABASE_URL`, `JWT_SECRET`, and any admin-specific secrets (see `research.md` Decision 9 table).
 - [ ] T066 [US1] Configure `barter-admin` **Ignored Build Step** to run `npx turbo-ignore admin` (skip the build if no files under the admin filter changed)
 - [ ] T067 [US1] Configure `barter-web` **Ignored Build Step** to run `npx turbo-ignore web` (skip web builds when only admin changed)
-- [ ] T068 [US1] Trigger a preview deploy of `barter-admin`. Verify admin login flow works end-to-end against the production database from the `vercel.app` preview URL.
+- [x] T068 [US1] **`barter-admin` Vercel project created** (Root Dir `apps/admin`; build `cd ../.. && turbo run build --filter=admin...`; install `cd ../.. && pnpm install --frozen-lockfile`; env `DATABASE_URL` + `JWT_SECRET`). First deploy **clean on the first try** (the baked-in `transpilePackages`/tracing/`@source` paid off — no first-deploy 500). Login verified E2E at `barter-admin-wine.vercel.app`: styled login → auth succeeds → `admin_token` set → `GET /api/auth/me` returns admin JSON. (Post-login `/dashboard` 404 was expected pre-stage-4.)
+- [~] T066/T067 [US1] **Deviation:** `turbo-ignore` is now deprecated by Vercel. Used the built-in **"Skip deployments when there are no changes to the root directory or its dependencies"** toggle on both `barter-admin` and `barter-app` (Ignored Build Step → Behavior=Automatic). Same dependency-aware per-app skipping, first-party. Formal isolation check is T075/T076.
 
 ### Migrate admin features one route family at a time
 
-Each of the following tasks is a separate PR. Each PR moves one admin feature, updates fetch sites, deploys a preview, smoke-tests, then merges. The corresponding `apps/web/app/admin/<area>` and `apps/web/app/api/admin/<area>` directories are deleted in the same PR.
+Each of the following tasks is a separate PR. Each PR moves one admin feature, updates fetch sites, deploys a preview, smoke-tests, then merges. **Strategy: keep-old-until-verified** — these **copy** into `apps/admin` (de-prefixing `/admin/` → `/`); the `apps/web/app/admin/*` + `apps/web/app/api/admin/*` originals are removed in one final cleanup PR once `barter-admin` is fully verified.
 
 - [ ] T069 [US1] Migrate **users**: move `apps/web/app/admin/users/` → `apps/admin/app/users/`; move `apps/web/app/api/admin/users/` → `apps/admin/app/api/users/`; update fetch sites from `/api/admin/users` → `/api/users` inside the moved tree; deploy preview; smoke-test; delete from `apps/web`; merge.
 - [ ] T070 [US1] Migrate **listings**: same pattern for `apps/web/app/admin/listings/` and `apps/web/app/api/admin/listings/`.
 - [ ] T071 [US1] Migrate **reports**: same pattern.
 - [ ] T072 [US1] Migrate **audit-logs**: same pattern; also move `apps/web/lib/audit.ts` → `apps/admin/lib/audit.ts`.
-- [ ] T073 [US1] Migrate **dashboard**: same pattern.
-- [ ] T074 [US1] After all admin features have moved, finalise `apps/admin/app/page.tsx` to redirect to `/dashboard` when authenticated or `/login` when not.
+- [x] T073 [US1] Migrated **dashboard** (done FIRST, intentionally — so the post-login 404 becomes the real home before the other features). Copied `dashboard/page.tsx` → `app/(protected)/dashboard/page.tsx` (de-prefixed) + `app/api/admin/dashboard/route.ts` → `app/api/dashboard/route.ts` (verbatim). Created `app/(protected)/layout.tsx` (AdminSidebar + `getAdminFromCookies` guard — completes the deferred guard part of T059; `/login` stays public outside the group). admin build green. Branch `010-admin-dashboard`, commit pending preview verify.
+- [x] T074 [US1] Finalised `apps/admin/app/page.tsx` — `getAdminFromCookies()` → `/dashboard` if authed else `/login`. (Done early alongside the dashboard; safe since both targets now exist.)
 
 ### Verify per-app deploy isolation
 
