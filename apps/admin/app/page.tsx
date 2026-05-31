@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
+import { getAdminFromCookies } from "@/lib/admin-auth"
 
-// Skeleton landing. Finalized in T074 to redirect to /dashboard when an admin
-// session exists, or /login otherwise. For now the only real entry point is
-// /login (moved into this app in stage 2).
-export default function AdminHome() {
-  redirect("/login")
+// Landing: send authenticated admins to the dashboard, everyone else to login.
+export default async function AdminHome() {
+  const admin = await getAdminFromCookies()
+  redirect(admin ? "/dashboard" : "/login")
 }
