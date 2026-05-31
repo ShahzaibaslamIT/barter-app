@@ -153,12 +153,14 @@ P2 user stories `US4` (Shared Data Layer) and `US5` (Single-Command Dev) are seq
 
 ### Move admin login + auth (the smallest deployable admin feature)
 
-- [ ] T059 [US1] Move `apps/web/app/admin/layout.tsx` → `apps/admin/app/layout.tsx` (merge with T057); move `apps/web/app/admin/AdminSidebar.tsx` → `apps/admin/components/AdminSidebar.tsx`
-- [ ] T060 [US1] Move `apps/web/app/admin/login/` → `apps/admin/app/login/`
-- [ ] T061 [US1] Move `apps/web/lib/admin-auth.ts` → `apps/admin/lib/admin-auth.ts`
-- [ ] T062 [US1] Move `apps/web/app/api/admin/auth/` → `apps/admin/app/api/auth/` (URL prefix `/admin/` is dropped on the admin host per `contracts/route-ownership.md`)
-- [ ] T063 [US1] Update every fetch call inside the moved admin login UI from `fetch('/api/admin/auth/...')` to `fetch('/api/auth/...')`. Files: `apps/admin/app/login/page.tsx` and any client component under the moved login tree.
-- [ ] T064 [US1] Run `pnpm --filter admin build` from repo root. Build must succeed.
+> **Strategy: keep-old-until-verified (user choice).** Stage 2 **copies** (does not `git mv`) login/auth into `apps/admin`, leaving `apps/web/app/admin/*` fully intact so the current `/admin` panel keeps working throughout migration. The `apps/web` admin tree is removed in one final cleanup PR once `barter-admin` is verified.
+
+- [~] T059 [US1] **Copied** `AdminSidebar.tsx` → `apps/admin/components/AdminSidebar.tsx` (nav hrefs / logout fetch / login redirect de-prefixed). The web admin `layout.tsx` guard (`x-pathname`-based) was **not** moved — admin-app root layout stays the minimal T057 one; the protected layout (AdminSidebar + `getAdminFromCookies` guard) is created in stage 4 when the authed pages land. (`apps/web` layout untouched.)
+- [~] T060 [US1] **Copied** `apps/web/app/admin/login/page.tsx` → `apps/admin/app/login/page.tsx` (web original left in place).
+- [~] T061 [US1] **Copied** `apps/web/lib/admin-auth.ts` → `apps/admin/lib/admin-auth.ts` verbatim (already imports `@barter/db`; web original left in place).
+- [~] T062 [US1] **Copied** `apps/web/app/api/admin/auth/{login,logout,me}` → `apps/admin/app/api/auth/{login,logout,me}` (`/admin` URL prefix dropped on the admin host). web originals left in place.
+- [x] T063 [US1] Updated the copied login UI: `fetch('/api/admin/auth/login')` → `fetch('/api/auth/login')`, post-login redirect `/admin/dashboard` → `/dashboard`. (AdminSidebar logout/nav also de-prefixed.)
+- [x] T064 [US1] `pnpm turbo run build --filter=admin...` green — admin routes: `/`, `/login`, `/api/auth/{login,logout,me}`. Added `bcryptjs` + `lucide-react` to admin deps. Committed `359d8ef`. **Cleanup note:** the `[~]` copies above become true moves when `apps/web/app/admin/*` + `lib/admin-auth.ts` + `app/api/admin/auth/*` are deleted in the final Phase 5 cleanup (after `barter-admin` is verified).
 
 ### Stand up the admin Vercel project
 
