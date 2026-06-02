@@ -12,7 +12,6 @@
     "@barter/config": "workspace:*",
     "@barter/db": "workspace:*",
     "@barter/types": "workspace:*",
-    "@barter/ui": "workspace:*",
     "bcryptjs": "^3.0.2",
     "geist": "latest",
     "jsonwebtoken": "^9.0.2",

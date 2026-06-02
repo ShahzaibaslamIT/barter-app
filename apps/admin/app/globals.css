@@ -1,11 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Tailwind v4 auto-scans only this app's tree. The shared UI kit lives in a
-   separate workspace package, so its class names must be registered explicitly
-   or they get purged — components then render unstyled/mispositioned.
-   (Same fix as apps/web; see Phase 2c.) */
-@source "../../../packages/ui/src/**/*.{ts,tsx}";
+/* NOTE: no `@source` for packages/ui here — the admin app renders its own JSX
+   with plain Tailwind + lucide icons and imports zero @barter/ui components, so
+   Tailwind's default scan of this app's own tree is sufficient (Phase 8 audit). */
 
 @custom-variant dark (&:is(.dark *));
 
