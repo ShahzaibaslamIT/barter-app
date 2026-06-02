@@ -21,6 +21,9 @@ module.exports = {
     "build/",
     "coverage/",
     "*.config.js",
-    "*.config.mjs"
+    "*.config.mjs",
+    // Next.js auto-generates this; `next lint` ignores it by default, but a
+    // direct ESLint run would otherwise flag its triple-slash reference.
+    "next-env.d.ts"
   ]
 };

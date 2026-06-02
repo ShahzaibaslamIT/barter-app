@@ -328,7 +328,6 @@ import {
   MapPin,
 } from "lucide-react";
 import { MakeOfferDialog } from "@/components/offers/make-offer-dialog";
-import { useToast } from "@barter/ui";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 
 /* =========================
@@ -401,7 +400,6 @@ export default function HomePage() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { toast } = useToast();
 
   /* =========================
      URL-BASED FILTERS

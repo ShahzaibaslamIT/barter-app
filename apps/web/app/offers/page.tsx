@@ -188,7 +188,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { BottomNav } from "@barter/ui"
 import { OfferCard } from "@/components/offers/offer-card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@barter/ui"
@@ -220,7 +219,6 @@ export default function OffersPage() {
   const [receivedOffers, setReceivedOffers] = useState<Offer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasMounted, setHasMounted] = useState(false)
-  const router = useRouter()
 
   // ✅ Wait for client-side mount before accessing localStorage
   useEffect(() => {

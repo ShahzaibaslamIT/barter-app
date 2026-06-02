@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { Card, CardContent } from "@barter/ui"
-import { Button } from "@barter/ui"
-import { Badge } from "@barter/ui"
-import { MapPin, Package, Wrench } from "lucide-react"
 
 // ✅ Import the entire Map component dynamically
 const DynamicMap = dynamic(() => import('./LeafletMap'), { 
@@ -44,7 +40,7 @@ interface MapViewProps {
 }
 
 export function MapView({ listings, userLocation, onListingSelect }: MapViewProps) {
-  const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
+  const [, setSelectedListing] = useState<Listing | null>(null)
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {

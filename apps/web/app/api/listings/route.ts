@@ -308,7 +308,6 @@ export const runtime = "nodejs"
 
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@barter/db"
-import { getUserFromRequest } from "@/lib/auth"
 import { getServerUser } from "@/lib/get-server-user"
 import { enforceUserStatus } from "@/lib/user-status"
 

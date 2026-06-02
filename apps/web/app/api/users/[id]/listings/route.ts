@@ -52,7 +52,6 @@
 // app/api/users/[id]/listings/route.ts
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@barter/db"
-import { getUserFromRequest } from "@/lib/auth"
 
 export async function GET(
   request: NextRequest,
@@ -66,9 +65,6 @@ export async function GET(
     if (!userId || isNaN(userId)) {
       return NextResponse.json({ error: "Invalid user ID" }, { status: 400 })
     }
-
-    // ✅ Try to get authenticated user (optional)
-    const currentUser = await getUserFromRequest(request).catch(() => null)
 
     // ⚙️ Public endpoint:
     // Allow viewing listings for ANY user (not just the logged-in one)

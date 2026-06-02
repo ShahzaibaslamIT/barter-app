@@ -1,16 +1,6 @@
 import { prisma } from "@barter/db";
 import { NextResponse } from "next/server";
 
-interface UserStatusFields {
-  user_id: number;
-  status: string;
-  suspended_until: Date | null;
-  suspension_reason: string | null;
-  warning_count: number;
-  blacklisted_until: Date | null;
-  blacklist_reason: string | null;
-}
-
 /**
  * Check user status and auto-transition expired suspensions/blacklists.
  * Returns null if user is allowed to proceed, or a NextResponse error if blocked.
