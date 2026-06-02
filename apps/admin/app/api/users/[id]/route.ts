@@ -41,7 +41,7 @@ export async function PATCH(
   const { id } = await params;
   const userId = Number(id);
   const body = await req.json();
-  const { action, username, user_type, admin_notes, suspension_reason, suspended_until, blacklist_reason, blacklist_days } = body;
+  const { action, username, user_type, admin_notes, suspension_reason, suspended_until } = body;
 
   let updateData: Record<string, unknown> = {};
   let action_type = "edit_user";

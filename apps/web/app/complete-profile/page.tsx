@@ -156,15 +156,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@barter/ui";
 import { Input } from "@barter/ui";
 import { Label } from "@barter/ui";
 
 export default function CompleteProfilePage() {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

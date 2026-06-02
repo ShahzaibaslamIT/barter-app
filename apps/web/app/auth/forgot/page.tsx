@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
       setTimeout(() => {
         router.push(`/auth/reset?email=${encodeURIComponent(email)}`);
       }, 600);
-    } catch (err) {
+    } catch {
       toast({
         title: "Error",
         description: "Something went wrong.",

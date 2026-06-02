@@ -33,18 +33,7 @@ export default function EditListingClient({
   const [condition, setCondition] = useState(listing.condition || "");
   const [locationText, setLocationText] = useState(listing.location_text || "");
   const [photos, setPhotos] = useState<string[]>(listing.photos || []);
-  const [newPhotoUrl, setNewPhotoUrl] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const handleAddPhoto = () => {
-    if (!newPhotoUrl.trim()) return;
-    setPhotos((prev) => [...prev, newPhotoUrl.trim()]);
-    setNewPhotoUrl("");
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -232,7 +232,7 @@ export default function LeafletMap({ center, listings, userLocation, onListingSe
       if (map) {
         try {
           map.remove()
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
         setMap(null)

@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
       setTimeout(() => {
         router.push("/auth");
       }, 800);
-    } catch (err) {
+    } catch {
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",

@@ -1480,7 +1480,7 @@ export function ChatInterface({ threadId, currentUserId }: ChatInterfaceProps) {
       } else {
         throw new Error(data.error || "Failed to send");
       }
-    } catch (err) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to send message",

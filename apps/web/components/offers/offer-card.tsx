@@ -873,8 +873,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@barter/ui"
 import { RatingDialog } from "@/components/ratings/rating-dialog"
 import { useToast } from "@barter/ui"
 import {
-  Package,
-  Wrench,
   Clock,
   CheckCircle,
   XCircle,

@@ -55,7 +55,7 @@ export function ThreadList({ currentUserId, onSelectThread }: ThreadListProps) {
           variant: "destructive",
         })
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load conversations",

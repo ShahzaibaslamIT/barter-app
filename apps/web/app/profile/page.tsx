@@ -539,7 +539,6 @@ import {
 } from "@barter/ui";
 import { Input } from "@barter/ui";
 import { Label } from "@barter/ui";
-import { Textarea } from "@barter/ui";
 import { useToast } from "@barter/ui";
 import { useTermsGate } from "@/hooks/use-terms-gate";
 import {
@@ -753,8 +752,6 @@ export default function ProfilePage() {
         const error = await res.json();
         throw new Error(error.message || "Failed to update profile");
       }
-
-      const data = await res.json();
 
       // ✅ Update local storage and state
       const updated = {
